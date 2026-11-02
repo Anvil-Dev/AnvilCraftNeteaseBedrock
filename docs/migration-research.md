@@ -2,7 +2,7 @@
 
 本文档基于上游 AnvilCraft 源码与网易 ModSDK 官方文档，梳理各玩法系统在基岩版中的实现方式、技术改造点与 API 限制。
 
-上游源码与官方接口索引见 [sources.md](sources.md)，分阶段推进与验收标准见 [development-plan.md](development-plan.md)。方块粉碎已接入两条配方，原版铁砧的落地事件仍待客户端实测。
+上游源码与官方接口索引见 [sources.md](sources.md)，分阶段推进与验收标准见 [development-plan.md](development-plan.md)。原版铁砧的两条方块粉碎配方已通过网易 3.10 PC 客户端实测。[复测记录](development.md#复测原版铁砧粉碎)
 
 ## 对照基线
 
