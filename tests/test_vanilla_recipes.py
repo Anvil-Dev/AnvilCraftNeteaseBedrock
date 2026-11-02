@@ -31,9 +31,11 @@ class VanillaRecipeTests(unittest.TestCase):
                     result = Counter()
                     for item in products(batch, roll=lambda: 0):
                         result[item["newItemName"]] += item["count"]
-                    expected = {}
+                    expected = Counter()
                     for name, count in recipe.outputs:
-                        expected[name] = count["n"] if isinstance(count, dict) else count
+                        expected[name] += (count.get("n", count.get("min"))
+                                           if isinstance(count, dict) else count)
+                    expected = {name: count for name, count in expected.items() if count}
                     self.assertEqual(expected, dict(result), recipe.source)
 
     def test_mesh_rolls_each_result_for_each_input_with_strict_probability_boundaries(self):
@@ -63,7 +65,7 @@ class VanillaRecipeTests(unittest.TestCase):
         count = output_count({"type": "minecraft:binomial", "n": 1.0, "p": 0.2})
         self.assertEqual(1, count["n"])
         self.assertIsInstance(count["n"], int)
-        self.assertRaises(ValueError, output_count, {"type": "minecraft:uniform", "min": 1, "max": 2})
+        self.assertRaises(ValueError, output_count, {"type": "minecraft:uniform", "min": 1.5, "max": 2})
 
     def test_shaped_compression_uses_only_the_common_vanilla_ingredient(self):
         iron = "minecraft:iron_ingot"

@@ -25,4 +25,6 @@
 
 方块涂抹采用同一提交的 `recipe/block_smear/` 与 `BlockSmearRecipe.java`，共 122 条原版配方。基岩版的悬挂砂轮状态、铜门双半转换、含水层与失败恢复均在本仓库用 Python 2.7 重写，手册正文由本项目编写。
 
+四种专用加工台按同一提交的 `ProcessingTableBlock.java`、`ProcessingTableBlockEntity.java`、`UseItemOnBlock.java` 与 `recipe/stamping_platform.json` 重写，接入 `recipe/item_crush/` 的 89 条原版配方及 `recipe/stamping/` 的 5 条原版配方。加工台模型、碰撞盒、手册与中文名称由本项目编写，模型直接引用游戏内置铁块、石头、脚手架和铁活板门纹理图集，未复制上游美术文件。
+
 开发依赖 `mc-netease-sdk` 是网易发布的接口补全包，其版权与许可归属该依赖自身；游戏发布包通过网易运行环境调用 ModSDK。

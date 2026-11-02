@@ -75,7 +75,7 @@ class Engine(object):
     def GetBlockNew(self, pos, dimension):
         return {"name": self.cells.get((dimension, pos), "minecraft:air")}
 
-    def SetBlockNew(self, pos, block, mode, dimension, legacy, updateNeighbors=True):
+    def SetBlockNew(self, pos, block, mode, dimension, legacy=True, updateNeighbors=True):
         self.writes.append((dimension, pos, block["name"]))
         self.cells[dimension, pos] = block["name"]
         return True

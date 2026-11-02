@@ -1,1 +1,5 @@
 item.anvilcraft:guide_book.name=铁砧工艺手册
+tile.anvilcraft:stamping_platform.name=冲压平台
+tile.anvilcraft:crushing_table.name=粉碎台
+tile.anvilcraft:sifting_table.name=过筛台
+tile.anvilcraft:unpacking_table.name=解包台

@@ -106,6 +106,23 @@ class DropWork(object):
     def close(self):
         self._delivery.flush()
 
+    def deliver(self, dim, deliveries):
+        self.load()
+        self._delivery.send(dim, deliveries)
+
+    def snapshot(self, platform, dim, pos):
+        return self._snapshot(platform, dim, pos)
+
+    def take(self, drop, platform, dim, pos, tick):
+        current = self._read(drop.entity, platform, dim, pos)
+        if current is None or current.item != drop.item or drop.entity in self._claimed:
+            return False
+        self._claimed[drop.entity] = tick + 2
+        if self._system.DestroyEntity(drop.entity):
+            return True
+        del self._claimed[drop.entity]
+        return False
+
     def tick(self, tick):
         for entity, deadline in self._claimed.items():
             if tick >= deadline:

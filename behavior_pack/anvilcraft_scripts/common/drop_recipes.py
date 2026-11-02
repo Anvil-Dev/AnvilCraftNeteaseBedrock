@@ -5,11 +5,17 @@
 from collections import Counter, namedtuple
 from random import random
 
-from anvilcraft_scripts.common.vanilla_catalog import COMPRESS, MESH, UNPACK
+from anvilcraft_scripts.common.vanilla_catalog import COMPRESS, ITEM_CRUSH, MESH, STAMPING, UNPACK
 
 CAULDRON = "minecraft:cauldron"
 TRAPDOOR = "minecraft:iron_trapdoor"
 SCAFFOLDING = "minecraft:scaffolding"
+STAMP = "anvilcraft:stamping_platform"
+CRUSH = "anvilcraft:crushing_table"
+SIFT = "anvilcraft:sifting_table"
+UNPACKING = "anvilcraft:unpacking_table"
+TABLES = (STAMP, CRUSH, SIFT, UNPACKING)
+ATTACHMENTS = {CRUSH: "minecraft:grindstone", SIFT: SCAFFOLDING, UNPACKING: TRAPDOOR}
 Drop = namedtuple("Drop", "entity pos item")
 Recipe = namedtuple("Recipe", "source inputs outputs")
 Batch = namedtuple("Batch", "recipe times debits")
@@ -19,6 +25,10 @@ RECIPES = {
     CAULDRON: tuple(Recipe(*row) for row in COMPRESS),
     TRAPDOOR: tuple(Recipe(*row) for row in UNPACK),
     SCAFFOLDING: tuple(Recipe(*row) for row in MESH),
+    STAMP: tuple(Recipe(*row) for row in STAMPING),
+    CRUSH: tuple(Recipe(*row) for row in ITEM_CRUSH),
+    SIFT: tuple(Recipe(*row) for row in MESH),
+    UNPACKING: tuple(Recipe(*row) for row in UNPACK),
 }
 STACK_LIMITS = {"minecraft:minecart": 1, "minecraft:honey_bottle": 16, "minecraft:snowball": 16}
 
@@ -28,7 +38,7 @@ def usable_platform(name, states):
         return states.get("fill_level") == 0
     if name == TRAPDOOR:
         return states.get("upside_down_bit") == 1 and states.get("open_bit") == 0
-    if name == SCAFFOLDING:
+    if name == SCAFFOLDING or name in TABLES:
         return True
     return False
 
@@ -38,7 +48,7 @@ def in_recipe_area(platform, pos, feet):
     x, y, z = pos
     if platform == CAULDRON:
         center_y, half_width, half_height = y + 0.625, 0.375, 0.375
-    elif platform == SCAFFOLDING:
+    elif platform == SCAFFOLDING or platform in TABLES:
         center_y, half_width, half_height = y + 1, 0.5, 0.5
     else:
         center_y, half_width, half_height = y + 1, 0.5, 0.125
@@ -77,7 +87,7 @@ def match_drops(platform, drops):
     """一次落砧只选一种配方，最多处理上游默认的 64 份。"""
     # 只拆能确认未载货的矿车，保留带战利品表或未知库存格式的掉落物。
     drops = [drop for drop in drops if item_name(drop.item) not in
-             ("minecraft:chest_minecart", "minecraft:hopper_minecart")
+             ("minecraft:chest_minecart", "minecraft:hopper_minecart", "minecraft:undyed_shulker_box")
              or _empty_cart_data(drop.item.get("userData"))]
     if not drops:
         return None
@@ -108,7 +118,11 @@ def products(batch, roll=random):
     """逐份独立抽取概率产物，再按基岩版堆叠上限拆分。"""
     for name, quantity in batch.recipe.outputs:
         maximum = STACK_LIMITS.get(name, 64)
-        if isinstance(quantity, dict):
+        if isinstance(quantity, dict) and quantity["type"] == "minecraft:uniform":
+            low, high = quantity["min"], quantity["max"]
+            remaining = sum(low + min(high - low, int(roll() * (high - low + 1)))
+                            for _ in range(batch.times))
+        elif isinstance(quantity, dict):
             remaining = sum(1 for _ in range(batch.times * quantity["n"]) if roll() < quantity["p"])
         else:
             remaining = batch.times * quantity

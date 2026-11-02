@@ -1,0 +1,27 @@
+{
+    "anvilcraft:stamping_platform": {
+        "textures": "iron_block",
+        "sound": "metal",
+        "netease_model": "anvilcraft:stamping_platform"
+    },
+    "anvilcraft:unpacking_table": {
+        "textures": "iron_block",
+        "sound": "metal",
+        "netease_model": "anvilcraft:unpacking_table"
+    },
+    "anvilcraft:sifting_table": {
+        "textures": "iron_block",
+        "sound": "metal",
+        "netease_model": "anvilcraft:sifting_table"
+    },
+    "format_version": [
+        1,
+        1,
+        0
+    ],
+    "anvilcraft:crushing_table": {
+        "textures": "iron_block",
+        "sound": "metal",
+        "netease_model": "anvilcraft:crushing_table"
+    }
+}

@@ -17,8 +17,9 @@ MC = "minecraft:"
 ALIASES = {
     "bricks": "brick_block", "magma_block": "magma", "melon": "melon_block",
     "nether_brick": "netherbrick", "nether_bricks": "nether_brick", "slime_block": "slime",
-    "snow_block": "snow", "waxed_copper_block": "waxed_copper",
+    "snow_block": "snow", "snow": "snow_layer", "waxed_copper_block": "waxed_copper",
     "flowering_azalea_leaves": "azalea_leaves_flowered",
+    "chain": "iron_chain", "shulker_box": "undyed_shulker_box",
 }
 
 
@@ -132,14 +133,19 @@ def explicit(recipe, tags):
                 raise ValueError("unsupported block predicate: %r" % recipe)
             if block.startswith(MC):
                 return "crush", [({block}, 1)], [(name, 1)]
-    if kind in ("anvilcraft:item_compress", "anvilcraft:unpack", "anvilcraft:mesh"):
+    if kind in ("anvilcraft:item_compress", "anvilcraft:unpack", "anvilcraft:mesh",
+                "anvilcraft:item_crush", "anvilcraft:stamping"):
         outputs = [(item["id"], item.get("count", 1)) for item in recipe["results"]]
         if all(name.startswith(MC) for name, _ in outputs):
             groups = [(vanilla_items(slot["items"], tags), slot.get("count", 1))
                       for slot in recipe["ingredients"]]
             if all(options for options, _ in groups):
-                if any(set(out) - {"id", "count"} for out in recipe["results"]) or any(
-                        set(slot) - {"items", "count"} for slot in recipe["ingredients"]):
+                def supported(slot):
+                    return not set(slot) - {"items", "count"} or (
+                        kind == "anvilcraft:item_crush" and slot == {
+                            "items": MC + "shulker_box", "components": {MC + "container": []}})
+                if any(set(out) - {"id", "count"} for out in recipe["results"]) or not all(
+                        supported(slot) for slot in recipe["ingredients"]):
                     raise ValueError("unsupported item properties: %r" % recipe)
                 outputs = [(name, output_count(count)) for name, count in outputs]
                 return kind.split(":")[1].replace("item_compress", "compress"), groups, outputs
@@ -152,6 +158,10 @@ def output_count(value):
             and value["type"] == MC + "binomial" and value["n"] == int(value["n"])
             and value["n"] >= 0 and 0 <= value["p"] <= 1):
         return {"type": MC + "binomial", "n": int(value["n"]), "p": value["p"]}
+    if (isinstance(value, dict) and set(value) == {"type", "min", "max"}
+            and value["type"] == MC + "uniform" and 0 <= value["min"] <= value["max"]
+            and all(value[key] == int(value[key]) for key in ("min", "max"))):
+        return {"type": MC + "uniform", "min": int(value["min"]), "max": int(value["max"])}
     raise ValueError("unsupported output count: %r" % value)
 
 
@@ -280,7 +290,7 @@ def render(catalog, compressed, squeezed, smearing):
             raise ValueError("unsupported block replacement: %r" % groups)
         lines.append('    "%s": "%s",' % (names[0], results[0][0]))
     lines.append("}")
-    for kind in ("compress", "unpack", "mesh"):
+    for kind in ("compress", "unpack", "mesh", "item_crush", "stamping"):
         lines.extend(["", kind.upper() + " = ("])
         for source, groups, results in catalog[kind]:
             lines.extend(['    ("%s",' % source, "     %s," % json.dumps(groups, sort_keys=True),
@@ -330,9 +340,9 @@ def main():
     else:
         with open(CATALOG, "wb") as handle:
             handle.write(data)
-    print("crush=%d compress=%d unpack=%d mesh=%d block_compress=%d squeezing=%d block_smear=%d" % (
+    print("crush=%d compress=%d unpack=%d mesh=%d item_crush=%d stamping=%d block_compress=%d squeezing=%d block_smear=%d" % (
         len(catalog["crush"]), len(catalog["compress"]), len(catalog["unpack"]), len(catalog["mesh"]),
-        len(compressed), len(squeezed), len(smearing)))
+        len(catalog["item_crush"]), len(catalog["stamping"]), len(compressed), len(squeezed), len(smearing)))
 
 
 if __name__ == "__main__":

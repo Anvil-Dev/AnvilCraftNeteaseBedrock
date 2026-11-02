@@ -3,9 +3,10 @@
 """将专用重力事件和原版下落实体的生命周期配对到同一次加工。"""
 
 from anvilcraft_scripts.common.impact import VANILLA_ANVILS, FallingAnvils, crush_at
-from anvilcraft_scripts.common.drop_recipes import RECIPES
+from anvilcraft_scripts.common.drop_recipes import RECIPES, TABLES
 from anvilcraft_scripts.server.drop_work import DropWork
 from anvilcraft_scripts.server.block_work import BlockWork
+from anvilcraft_scripts.server.stations import Stations
 
 
 def _nbt_value(tag):
@@ -62,6 +63,7 @@ class ImpactEvents(object):
 
     def listen(self, system):
         self._drop_work = DropWork(self._api, system, self._log)
+        self._stations = Stations(self._api, system, self._log, self._drop_work)
         for event, callback in (
             ("LoadServerAddonScriptsAfter", self._load_tags),
             ("HeavyBlockStartFallingServerEvent", self._start),
@@ -72,6 +74,9 @@ class ImpactEvents(object):
             ("EntityRemoveEvent", self._remove_entity),
             ("ChunkAcquireDiscardedServerEvent", self._unload),
             ("OnScriptTickServer", self._advance),
+            ("ServerBlockUseEvent", self._stations.use),
+            ("ServerBlockEntityTickEvent", self._stations.block_tick),
+            ("BlockRemoveServerEvent", self._stations.remove),
         ):
             system.ListenForEvent(self._api.GetEngineNamespace(), self._api.GetEngineSystemName(),
                                   event, self, callback)
@@ -119,7 +124,10 @@ class ImpactEvents(object):
         support = self._blocks.GetBlockNew(target, dimension) or {}
         platform = support.get("name")
         if platform in RECIPES and (expected is None or expected == platform):
-            self._drop_work.process(platform, dimension, target, self._tick)
+            if platform in TABLES:
+                self._stations.process(platform, dimension, target)
+            else:
+                self._drop_work.process(platform, dimension, target, self._tick)
             return
         result = crush_at(self._blocks, dimension, target, expected)
         if result:
@@ -205,6 +213,7 @@ class ImpactEvents(object):
 
     def _advance(self):
         self._tick += 1
+        self._stations.advance(self._tick)
         self._drop_work.tick(self._tick)
         self._block_work.tick(self._tick)
         for entity, fall in self._vanilla.items():
