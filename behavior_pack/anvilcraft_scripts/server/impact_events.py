@@ -3,6 +3,8 @@
 """将专用重力事件和原版下落实体的生命周期配对到同一次加工。"""
 
 from anvilcraft_scripts.common.impact import VANILLA_ANVILS, FallingAnvils, crush_at
+from anvilcraft_scripts.common.drop_recipes import RECIPES
+from anvilcraft_scripts.server.drop_work import DropWork
 
 
 def _nbt_value(tag):
@@ -57,6 +59,7 @@ class ImpactEvents(object):
         self._reported_missing_material = False
 
     def listen(self, system):
+        self._drop_work = DropWork(self._api, system, self._log)
         for event, callback in (
             ("LoadServerAddonScriptsAfter", self._load_tags),
             ("HeavyBlockStartFallingServerEvent", self._start),
@@ -72,10 +75,14 @@ class ImpactEvents(object):
                                   event, self, callback)
 
     def _load_tags(self, args):
+        self._drop_work.load()
         blocks = self._factory.CreateBlock(self._level)
         for block in blocks.LookupBlocksByBlockTag("anvilcraft:impact_anvils") or ():
             self._anvils.add(block["blockName"])
         self._log.info("[AnvilCraft] impact_anvils=%s", sorted(self._anvils))
+
+    def close(self):
+        self._drop_work.close()
 
     def _start(self, args):
         name = args["blockName"]
@@ -97,6 +104,15 @@ class ImpactEvents(object):
             expected = fall.support
         self._forget_vanilla(dimension, str(entity))
         if target is None:
+            return
+        # 同一格只出现了一块铁砧，其他实体的射线候选不能再次消费锅内的原料。
+        for other in self._vanilla.itervalues():
+            if other.dimension == dimension and other.landing == pos:
+                other.landing = None
+        support = self._blocks.GetBlockNew(target, dimension) or {}
+        platform = support.get("name")
+        if platform in RECIPES and (expected is None or expected == platform):
+            self._drop_work.process(platform, dimension, target, self._tick)
             return
         result = crush_at(self._blocks, dimension, target, expected)
         if result:
@@ -182,6 +198,7 @@ class ImpactEvents(object):
 
     def _advance(self):
         self._tick += 1
+        self._drop_work.tick(self._tick)
         for entity, fall in self._vanilla.items():
             if self._tick - fall.started >= 1200:
                 self._discard(fall.dimension, entity)

@@ -15,4 +15,6 @@
 
 阶段 0 的方块粉碎沿用上述提交中 `src/generated/resources/data/anvilcraft/recipe/block_crush/gravel.json` 与 `sand.json` 的输入和产物，落地结算按网易事件在 Python 2.7 中重新实现。实验方块引用游戏自带的纹理图集，实验界面的 JSON 与中文名称由本项目编写。
 
+阶段 1 的原料与产物来自同一提交的 `recipe/block_crush/`、`recipe/item_compress/bone_block.json` 与 `recipe/unpack/`。加工位置按 `ItemCompressRecipe.java`、`UnpackRecipe.java` 和 AnvilLib 的世界配方范围换算。手册沿用 `anvilcraft:guide_book` 与上游根进度的首次入服奖励，正文和网易书本配置由本项目编写，图标引用游戏内置书本纹理。[上游配方目录](https://github.com/Anvil-Dev/AnvilCraft/tree/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/generated/resources/data/anvilcraft/recipe)
+
 开发依赖 `mc-netease-sdk` 是网易发布的接口补全包，其版权与许可归属该依赖自身；游戏发布包通过网易运行环境调用 ModSDK。

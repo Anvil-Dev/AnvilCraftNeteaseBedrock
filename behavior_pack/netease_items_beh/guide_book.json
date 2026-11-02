@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "anvilcraft:guide_book",
+            "category": "items",
+            "register_to_create_menu": true
+        },
+        "components": {
+            "minecraft:max_stack_size": 1
+        }
+    }
+}

@@ -109,3 +109,7 @@ git diff --check
 ```
 
 2026-11-02 的 PC 测试日志确认基岩引擎 `1.21.130.0` 已加载主包两端。旧版服务端每次收到无参数的 `OnScriptTickServer` 都抛出 `TypeError: _advance() takes exactly 2 arguments (1 given)`。修复版客户端启动行包含 `addon=0.1.1`。服务端识别原版下落实体后记录 `falling anvil`，加工成功记录 `crush` 和产物 ID，输入未匹配或替换失败则记录 `no crush` 和脚下方块 ID。
+
+主包 `0.2.0` 同时更新了行为包与资源包，客户端启动行包含 `addon=0.2.0`。启用这一对包后，首次进入该世界的玩家会收到手册。物品加工日志中的 `item process` 记录产物 ID 和数量。[配方与复测方法](recipes.md)
+
+如果引擎拒绝生成产物或返还余料，服务端会把欠发物品保存到世界扩展数据 `anvilcraft:pending_drops_v1`，在目标区块加载后重试。如果补发已生成实体、存档写入和实体撤销又同时失败，`spawned item could not be retracted` 日志会列出实体 ID 和原始记录。此时先恢复存档写入并核对该物品，再重启世界。引擎的存档写入和掉落物生成分属两次调用，硬崩溃窗口需在存档回归时单独验证。

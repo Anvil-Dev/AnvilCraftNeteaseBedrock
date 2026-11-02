@@ -1,0 +1,22 @@
+{
+    "parent": "workshop",
+    "title": "方块粉碎",
+    "sortnum": 0,
+    "pages": [
+        {
+            "type": "textPage",
+            "subtitle": "圆石与沙子",
+            "content": "把原料方块放稳，让铁砧从正上方落下。每次下落加工脚下的一格。\n\n圆石 → 沙砾\n沙砾 → 沙子\n花岗岩 → 红沙\n灵魂土 → 灵魂沙"
+        },
+        {
+            "type": "textPage",
+            "subtitle": "磨制石材",
+            "content": "这些石材可以还原成对应的粗糙石材。\n\n磨制安山岩 → 安山岩\n磨制闪长岩 → 闪长岩\n磨制花岗岩 → 花岗岩"
+        },
+        {
+            "type": "textPage",
+            "subtitle": "裂纹砖",
+            "content": "铁砧可把下列方块砸成各自的裂纹版本，每块原料得到一块成品。\n\n石砖\n下界砖块\n磨制黑石砖\n深板岩砖\n深板岩瓦"
+        }
+    ]
+}

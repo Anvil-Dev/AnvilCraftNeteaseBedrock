@@ -52,6 +52,14 @@ class ImpactTests(unittest.TestCase):
         self.assertEqual("minecraft:sand", self.land(124))
         self.assertEqual(2, len(self.world.writes))
 
+    def test_polished_granite_needs_two_separate_falls_to_make_red_sand(self):
+        self.world.cells[1, (15, 63, -1)] = "minecraft:polished_granite"
+        self.start(21)
+        self.assertEqual("minecraft:granite", self.land(21))
+        self.assertIsNone(self.land(21))
+        self.start(22)
+        self.assertEqual("minecraft:red_sand", self.land(22))
+
     def test_unload_break_and_expiry_discard_starts(self):
         self.start(1)
         self.falls.unload(1, 1, 0, ["1"])

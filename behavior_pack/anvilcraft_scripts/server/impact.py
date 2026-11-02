@@ -15,3 +15,7 @@ class ImpactSystem(server_api.GetServerSystemCls()):
         self._events = ImpactEvents(server_api, logger)
         self._events.listen(self)
         logger.info("[AnvilCraft] server ready; Minecraft=%s", server_api.GetMinecraftVersion())
+
+    def Destroy(self):
+        self.UnListenAllEvents()
+        self._events.close()

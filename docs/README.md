@@ -11,13 +11,14 @@
 | 对照上游仓库 | [Anvil-Dev/AnvilCraft](https://github.com/Anvil-Dev/AnvilCraft) |
 | 对照分支与提交 | `dev/1.21/1.6`，`ef65f8a876c4d4d695a2f263f3f62d9280e10dad`（模组版本 `1.6.0`） |
 | 调研与统计日期 | 2026-11-02 |
-| 当前代码状态 | 阶段 0 进行中。主包已接入两条方块粉碎配方，工作台导入方法见 [开发规范](development.md#在-mc-studio-导入附加包) |
+| 当前代码状态 | 主包 `0.2.0` 已接入 24 条落砧配方和游戏内手册。圆石粉碎链已通过网易 3.10 PC 实测，新增配方待游戏内验收 |
 
 ## 文档列表
 
 | 文档 | 内容说明 |
 | --- | --- |
 | [development.md](development.md) | Python 2.7 环境配置、目标包目录结构、脚本编写规范与本地检查命令 |
+| [recipes.md](recipes.md) | 主包已接入的生存配方、加工平台、基岩版 ID 映射与验收记录 |
 | [migration-research.md](migration-research.md) | 上游玩法在网易 ModSDK 下的实现方案、API 限制与数据映射规则 |
 | [development-plan.md](development-plan.md) | 阶段 0 至阶段 6 的开发任务、前置依赖与游戏内验收标准 |
 | [sources.md](sources.md) | 上游 Java 源码入口索引、网易 ModAPI 官方文档链接与配方统计方法 |

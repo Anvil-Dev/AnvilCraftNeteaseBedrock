@@ -5,7 +5,7 @@
 from mod.common.mod import Mod
 from mod_log import logger
 
-VERSION = "0.1.1"
+VERSION = "0.2.0"
 
 
 @Mod.Binding(name="AnvilCraft", version=VERSION)
@@ -16,6 +16,8 @@ class AnvilCraftMod(object):
         import mod.server.extraServerApi as server_api
         server_api.RegisterSystem("AnvilCraft", "Impact",
                                   "anvilcraft_scripts.server.impact.ImpactSystem")
+        server_api.RegisterSystem("AnvilCraft", "Guide",
+                                  "anvilcraft_scripts.server.guide.GuideSystem")
 
     @Mod.InitClient()
     def init_client(self):
