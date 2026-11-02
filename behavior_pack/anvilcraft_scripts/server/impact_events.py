@@ -5,6 +5,7 @@
 from anvilcraft_scripts.common.impact import VANILLA_ANVILS, FallingAnvils, crush_at
 from anvilcraft_scripts.common.drop_recipes import RECIPES
 from anvilcraft_scripts.server.drop_work import DropWork
+from anvilcraft_scripts.server.block_work import BlockWork
 
 
 def _nbt_value(tag):
@@ -57,6 +58,7 @@ class ImpactEvents(object):
         self._vanilla = {}
         self._tick = 0
         self._reported_missing_material = False
+        self._block_work = BlockWork(api, logger)
 
     def listen(self, system):
         self._drop_work = DropWork(self._api, system, self._log)
@@ -76,6 +78,7 @@ class ImpactEvents(object):
 
     def _load_tags(self, args):
         self._drop_work.load()
+        self._block_work.load()
         blocks = self._factory.CreateBlock(self._level)
         for block in blocks.LookupBlocksByBlockTag("anvilcraft:impact_anvils") or ():
             self._anvils.add(block["blockName"])
@@ -83,6 +86,7 @@ class ImpactEvents(object):
 
     def close(self):
         self._drop_work.close()
+        self._block_work.close()
 
     def _start(self, args):
         name = args["blockName"]
@@ -109,6 +113,9 @@ class ImpactEvents(object):
         for other in self._vanilla.itervalues():
             if other.dimension == dimension and other.landing == pos:
                 other.landing = None
+        # 双方块配方已匹配但写入失败时，也不能继续粉碎其原料。
+        if self._block_work.process(dimension, target, expected):
+            return
         support = self._blocks.GetBlockNew(target, dimension) or {}
         platform = support.get("name")
         if platform in RECIPES and (expected is None or expected == platform):
@@ -199,6 +206,7 @@ class ImpactEvents(object):
     def _advance(self):
         self._tick += 1
         self._drop_work.tick(self._tick)
+        self._block_work.tick(self._tick)
         for entity, fall in self._vanilla.items():
             if self._tick - fall.started >= 1200:
                 self._discard(fall.dimension, entity)

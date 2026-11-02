@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""从上游默认数据包和基岩物品表生成三种落砧平台的原版配方。"""
+"""从上游默认数据包和基岩注册表生成原版落砧配方。"""
 
 import argparse
 from collections import defaultdict
@@ -12,12 +12,13 @@ import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CATALOG = os.path.join(ROOT, "behavior_pack", "anvilcraft_scripts", "common", "vanilla_catalog.py")
-RESOURCE = re.compile(r"^data/([^/]+)/(recipe|tags/item)/(.+)\.json$")
+RESOURCE = re.compile(r"^data/([^/]+)/(recipe|tags/item|tags/block)/(.+)\.json$")
 MC = "minecraft:"
 ALIASES = {
     "bricks": "brick_block", "magma_block": "magma", "melon": "melon_block",
     "nether_brick": "netherbrick", "nether_bricks": "nether_brick", "slime_block": "slime",
     "snow_block": "snow", "waxed_copper_block": "waxed_copper",
+    "flowering_azalea_leaves": "azalea_leaves_flowered",
 }
 
 
@@ -26,7 +27,7 @@ def resources(path):
     if os.path.isdir(path):
         base = os.path.join(path, "data")
         for namespace in sorted(os.listdir(base)):
-            for kind in ("recipe", "tags/item"):
+            for kind in ("recipe", "tags/item", "tags/block"):
                 for parent, _, files in os.walk(os.path.join(base, namespace, kind)):
                     for name in files:
                         file_path = os.path.join(parent, name)
@@ -45,16 +46,18 @@ def resources(path):
 def load_packs(paths):
     recipes = {}
     tags = defaultdict(list)
+    block_tags = defaultdict(list)
     for path in paths:
         for (namespace, kind, name), obj in resources(path):
             key = namespace + ":" + name
             if kind == "recipe":
                 recipes[key] = obj
             else:
+                target = block_tags if kind == "tags/block" else tags
                 if obj.get("replace"):
-                    tags[key] = []
-                tags[key].append(obj)
-    return recipes, tags
+                    target[key] = []
+                target[key].append(obj)
+    return recipes, tags, block_tags
 
 
 def vanilla_items(value, tags):
@@ -179,7 +182,44 @@ def compile_recipes(recipes, tags, registry):
     return catalog
 
 
-def render(catalog):
+def compile_blocks(recipes, tags, registry):
+    compressed, squeezed = [], []
+    for source, recipe in sorted(recipes.items()):
+        kind = recipe.get("type")
+        if kind not in ("anvilcraft:block_compress", "anvilcraft:squeezing"):
+            continue
+        result = recipe["result"]
+        if not result["block"].startswith(MC):
+            continue
+        if kind == "anvilcraft:block_compress":
+            groups = [sorted(vanilla_items(slot["blocks"], tags)) for slot in recipe["inputs"]]
+            if not all(groups):
+                continue
+            if len(groups) != 2 or any(set(slot) != {"blocks"} for slot in recipe["inputs"]):
+                raise ValueError("unsupported block inputs: %s" % source)
+            inputs = [[bedrock_id(name, registry) for name in group] for group in groups]
+            compressed.append((source, inputs[0], inputs[1], bedrock_id(result["block"], registry)))
+        else:
+            transform = recipe["transform"]
+            if not transform["id"].startswith(MC):
+                continue
+            block = recipe["ingredient"]["blocks"]
+            if not block.startswith(MC):
+                continue
+            if (recipe.get("fluid") != [] or transform["amount"] != 250 or
+                    set(recipe["ingredient"]) != {"blocks"} or
+                    set(recipe) - {"type", "ingredient", "result", "fluid", "transform"}):
+                raise ValueError("unsupported squeezing condition: %s" % source)
+            if transform["id"] not in (MC + "water", MC + "lava", MC + "powder_snow"):
+                raise ValueError("unsupported cauldron fluid: %s" % source)
+            squeezed.append((source, bedrock_id(block, registry), bedrock_id(result["block"], registry),
+                             transform["id"], transform["amount"]))
+        if set(result) != {"block"} or recipe.get("neoforge:conditions"):
+            raise ValueError("unsupported block result: %s" % source)
+    return compressed, squeezed
+
+
+def render(catalog, compressed, squeezed):
     lines = ["# -*- coding: utf-8 -*-", "# SPDX-License-Identifier: LGPL-3.0-or-later",
              u'"""由 tools/sync_vanilla_recipes.py 生成。"""', "", "CRUSH_RESULTS = {"]
     for _, groups, results in catalog["crush"]:
@@ -194,6 +234,15 @@ def render(catalog):
             lines.extend(['    ("%s",' % source, "     %s," % json.dumps(groups),
                           "     %s)," % json.dumps(results)])
         lines.append(")")
+    lines.extend(["", "BLOCK_COMPRESS = ("])
+    for source, upper, lower, result in compressed:
+        lines.extend(['    ("%s",' % source, "     %s, %s," % (json.dumps(upper), json.dumps(lower)),
+                      '     "%s"),' % result])
+    lines.extend([")", "", "SQUEEZING = {"])
+    for source, block, result, fluid, amount in squeezed:
+        lines.extend(['    "%s": ("%s",' % (block, source),
+                      '        "%s", "%s", %d),' % (result, fluid, amount)])
+    lines.append("}")
     return (u"\n".join(lines) + u"\n").encode("utf-8")
 
 
@@ -203,15 +252,20 @@ def main():
     parser.add_argument("--neoforge", required=True)
     parser.add_argument("--anvilcraft", required=True)
     parser.add_argument("--bedrock-items", required=True)
+    parser.add_argument("--bedrock-blocks", required=True)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     paths = [args.minecraft, args.neoforge] + [
         os.path.join(args.anvilcraft, "src", folder, "resources") for folder in ("generated", "main")]
-    recipes, tags = load_packs(paths)
+    print("Loading default recipes and tags...")
+    recipes, tags, block_tags = load_packs(paths)
     with open(args.bedrock_items, "rb") as handle:
         registry = {row["name"] for row in json.load(handle)["data_items"]}
     catalog = compile_recipes(recipes, tags, registry)
-    data = render(catalog)
+    with open(args.bedrock_blocks, "rb") as handle:
+        blocks = {row["name"] for row in json.load(handle)["data_items"]}
+    compressed, squeezed = compile_blocks(recipes, block_tags, blocks)
+    data = render(catalog, compressed, squeezed)
     if args.check:
         with open(CATALOG, "rb") as handle:
             if handle.read().replace("\r\n", "\n") != data:
@@ -219,8 +273,9 @@ def main():
     else:
         with open(CATALOG, "wb") as handle:
             handle.write(data)
-    print("crush=%d compress=%d unpack=%d" % tuple(
-        len(catalog[kind]) for kind in ("crush", "compress", "unpack")))
+    print("crush=%d compress=%d unpack=%d block_compress=%d squeezing=%d" % (
+        len(catalog["crush"]), len(catalog["compress"]), len(catalog["unpack"]),
+        len(compressed), len(squeezed)))
 
 
 if __name__ == "__main__":

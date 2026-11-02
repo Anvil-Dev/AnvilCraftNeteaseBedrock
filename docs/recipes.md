@@ -1,12 +1,14 @@
 # 生存加工配方
 
-主包 `0.3.0` 接入 99 条原料和产物均为原版物品或方块的配方。首次进入世界会获得《铁砧工艺手册》（`anvilcraft:guide_book`），可按平台查阅配方。
+主包 `0.4.0` 接入 112 条原料和产物均为原版物品或方块的配方。首次进入世界会获得《铁砧工艺手册》（`anvilcraft:guide_book`），可按平台查阅配方。
 
 | 加工平台 | 上游直接定义 | 上游从工作台配方转换 | 网易 3.10 可用 |
 | --- | ---: | ---: | ---: |
 | 方块粉碎 | 12 | 0 | 12 |
 | 空炼药锅压缩 | 1 | 32 | 33 |
 | 铁活板门解包 | 15 | 40 | 54 |
+| 双方块压合 | 9 | 0 | 9 |
+| 炼药锅方块压榨 | 4 | 0 | 4 |
 
 上游有 1 条动力矿车（`minecraft:furnace_minecart`）解包配方。基岩 1.21.130 没有这个原版物品，因此可用的矿车解包配方有 3 条。清单以上游默认启用的数据包为准，木材标签中的原木、木头和去皮变种合计为同一条配方。[基岩版物品注册表](https://github.com/Mojang/bedrock-samples/blob/v1.21.130.3/metadata/vanilladata_modules/mojang-items.json) · [上游工作台配方转换逻辑](https://github.com/Anvil-Dev/AnvilCraft/blob/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/recipe/anvil/wrap/VanillaRecipesWrap.java)
 
@@ -88,6 +90,37 @@
 
 同一平台有多条可加工配方时，服务端按上游优先级选择。同分时按上游配方 ID 排序。例如，门上同时有运输矿车和原木时先拆矿车。游戏使用的配方表逐条列出压缩和解包的上游 ID、每组可用的基岩原料、用量和全部产物。下界砖物品与下界砖块分别使用 `minecraft:netherbrick`、`minecraft:nether_brick`，整块西瓜和西瓜片分别使用 `minecraft:melon_block`、`minecraft:melon_slice`。[完整配方数据](../behavior_pack/anvilcraft_scripts/common/vanilla_catalog.py)
 
+## 双方块压合
+
+按表中的顺序把两个原料方块上下叠好，让原版铁砧从正上方落下。每次消耗两格原料，上格变为空气，产物生成在下格。压合优先于单方块粉碎，同一次落地只结算一种加工。已经匹配压合、但引擎拒绝写入时，服务端恢复原状态，停止本次加工。
+
+| 上方方块 | 下方方块 | 下方产物 | 上游 `block_compress/` 配方名 |
+| --- | --- | --- | --- |
+| 石头 | 石头 | 深板岩 | `deepslate` |
+| 玄武岩 | 玄武岩 | 黑石 | `blackstone` |
+| 冰 | 冰 | 浮冰 | `packed_ice` |
+| 浮冰 | 浮冰 | 蓝冰 | `blue_ice` |
+| 下界疣块 | 下界岩 | 绯红菌岩 | `crimson_nylium` |
+| 诡异疣块 | 下界岩 | 诡异菌岩 | `warped_nylium` |
+| 苔藓块 | 泥土 | 草方块 | `grass_block` |
+| 树叶 | 泥土 | 灰化土 | `podzol` |
+| 红色蘑菇方块、棕色蘑菇方块或蘑菇柄 | 泥土 | 菌丝体 | `mycelium` |
+
+树叶按上游 `#minecraft:leaves` 展开，支持橡木、云杉、白桦、丛林、金合欢、深色橡木、红树、樱花、杜鹃和开花杜鹃。开花杜鹃树叶在基岩版使用 `minecraft:azalea_leaves_flowered`。
+
+## 炼药锅方块压榨
+
+把原料方块放在炼药锅正上方，再让铁砧落在原料上。固体产物留在原料所在格，流体进入下方的原版锅。锅里已有同种流体且容量足够时可以继续压榨，满锅、其他流体、药水或染色水会停止加工并保留原料。
+
+| 原料方块 | 固体产物 | 锅内流体 | 上游 `squeezing/` 配方名 |
+| --- | --- | --- | --- |
+| 湿海绵 | 海绵 | 水 | `water_cauldron_from_wet_sponge` |
+| 苔藓块 | 覆地苔藓 | 水 | `water_cauldron_from_moss_block` |
+| 岩浆块 | 下界岩 | 熔岩 | `lava_cauldron_from_magma_block` |
+| 雪块 | 冰 | 细雪 | `powder_snow_cauldron_from_snow_block` |
+
+上游这四条配方各产生 250 mB（四分之一桶），普通锅按自身显示层数取整。移植沿用普通锅的显示结果，水和细雪从空锅开始每次增加一层，三次装满；熔岩一次装满。基岩版用同一 `minecraft:cauldron` 方块的 `cauldron_liquid` 区分流体，水和细雪每层对应两个 `fill_level` 刻度，满锅为 6。服务端通过 `SetBlockStates` 修改锅状态，保留方块实体数据。[上游普通锅液量换算](https://github.com/Anvil-Dev/AnvilCraft/blob/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/recipe/anvil/predicate/block/HasCauldron.java) · [目标基岩版方块状态](https://github.com/Mojang/bedrock-samples/blob/v1.21.130.3/metadata/vanilladata_modules/mojang-blocks.json)
+
 ## 验收记录
 
-圆石→沙砾→沙子已在网易 3.10 PC 客户端通过手动复测。99 条配方已与上游默认数据和目标物品表核对。Python 2.7 回放验证了落地触发、平台状态、分堆扣料、同种木材不同变种混放、矿车双产物和欠发补发。新增配方与手册的游戏内表现待客户端确认。[圆石粉碎复测记录](development.md#复测原版铁砧粉碎)
+圆石→沙砾→沙子已在网易 3.10 PC 客户端通过手动复测。112 条配方已与上游默认数据和目标注册表核对。Python 2.7 回放验证了落地触发、加工优先级、上下顺序、锅内液体保护、分堆扣料、物品变种、双产物和失败恢复。新增配方与手册的游戏内表现待客户端确认。[圆石粉碎复测记录](development.md#复测原版铁砧粉碎)
