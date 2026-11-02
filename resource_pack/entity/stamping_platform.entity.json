@@ -1,0 +1,26 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "geometry": {
+                "material_0_0": "geometry.anvilcraft.stamping_platform.material_0_0",
+                "material_1_0": "geometry.anvilcraft.stamping_platform.material_1_0",
+                "material_2_0": "geometry.anvilcraft.stamping_platform.material_2_0"
+            },
+            "identifier": "anvilcraft:stamping_platform",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "render_controllers": [
+                "controller.render.anvilcraft.stamping_platform.material_0",
+                "controller.render.anvilcraft.stamping_platform.material_1",
+                "controller.render.anvilcraft.stamping_platform.material_2"
+            ],
+            "textures": {
+                "material_0": "textures/anvilcraft/block/processing_table_bottom",
+                "material_1": "textures/anvilcraft/block/processing_table_side",
+                "material_2": "textures/anvilcraft/block/processing_table_top"
+            }
+        }
+    }
+}

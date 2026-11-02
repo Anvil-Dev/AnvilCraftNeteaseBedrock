@@ -1,0 +1,111 @@
+{
+    "resource_pack_name": "anvilcraft",
+    "texture_data": {
+        "anvilcraft_block_anvil": {
+            "textures": "textures/blocks/anvil_base"
+        },
+        "anvilcraft_block_anvil_top": {
+            "textures": "textures/blocks/anvil_top_damaged_0"
+        },
+        "anvilcraft_block_chipped_anvil_top": {
+            "textures": "textures/blocks/anvil_top_damaged_1"
+        },
+        "anvilcraft_block_chute": {
+            "textures": "textures/anvilcraft/block/chute"
+        },
+        "anvilcraft_block_chute_bottom": {
+            "textures": "textures/anvilcraft/block/chute_bottom"
+        },
+        "anvilcraft_block_chute_top": {
+            "textures": "textures/anvilcraft/block/chute_top"
+        },
+        "anvilcraft_block_chute_top_directional": {
+            "textures": "textures/anvilcraft/block/chute_top_directional"
+        },
+        "anvilcraft_block_damaged_anvil_top": {
+            "textures": "textures/blocks/anvil_top_damaged_2"
+        },
+        "anvilcraft_block_magnet_block_bottom": {
+            "textures": "textures/anvilcraft/block/magnet_block_bottom"
+        },
+        "anvilcraft_block_magnet_block_side": {
+            "textures": "textures/anvilcraft/block/magnet_block_side"
+        },
+        "anvilcraft_block_magnet_block_top": {
+            "textures": "textures/anvilcraft/block/magnet_block_top"
+        },
+        "anvilcraft_block_magnetic_chute_bottom": {
+            "textures": "textures/anvilcraft/block/magnetic_chute_bottom"
+        },
+        "anvilcraft_block_magnetic_chute_side": {
+            "textures": "textures/anvilcraft/block/magnetic_chute_side"
+        },
+        "anvilcraft_block_processing_table_bottom": {
+            "textures": "textures/anvilcraft/block/processing_table_bottom"
+        },
+        "anvilcraft_block_processing_table_crushing": {
+            "textures": "textures/anvilcraft/block/processing_table_crushing"
+        },
+        "anvilcraft_block_processing_table_side": {
+            "textures": "textures/anvilcraft/block/processing_table_side"
+        },
+        "anvilcraft_block_processing_table_sifting": {
+            "textures": "textures/anvilcraft/block/processing_table_sifting"
+        },
+        "anvilcraft_block_processing_table_top": {
+            "textures": "textures/anvilcraft/block/processing_table_top"
+        },
+        "anvilcraft_block_processing_table_unpacking": {
+            "textures": "textures/anvilcraft/block/processing_table_unpacking"
+        },
+        "anvilcraft_block_simple_chute": {
+            "textures": "textures/anvilcraft/block/simple_chute"
+        },
+        "anvilcraft_block_simple_chute_directional": {
+            "textures": "textures/anvilcraft/block/simple_chute_directional"
+        },
+        "anvilcraft_block_simple_magnetic_chute": {
+            "textures": "textures/anvilcraft/block/simple_magnetic_chute"
+        },
+        "anvilcraft_icon_chute": {
+            "textures": "textures/anvilcraft/icons/chute"
+        },
+        "anvilcraft_icon_crushing_table": {
+            "textures": "textures/anvilcraft/icons/crushing_table"
+        },
+        "anvilcraft_icon_held_anvil": {
+            "textures": "textures/anvilcraft/icons/held_anvil"
+        },
+        "anvilcraft_icon_held_chipped_anvil": {
+            "textures": "textures/anvilcraft/icons/held_chipped_anvil"
+        },
+        "anvilcraft_icon_held_damaged_anvil": {
+            "textures": "textures/anvilcraft/icons/held_damaged_anvil"
+        },
+        "anvilcraft_icon_hollow_magnet_block": {
+            "textures": "textures/anvilcraft/icons/hollow_magnet_block"
+        },
+        "anvilcraft_icon_magnet_block": {
+            "textures": "textures/anvilcraft/icons/magnet_block"
+        },
+        "anvilcraft_icon_magnetic_chute": {
+            "textures": "textures/anvilcraft/icons/magnetic_chute"
+        },
+        "anvilcraft_icon_sifting_table": {
+            "textures": "textures/anvilcraft/icons/sifting_table"
+        },
+        "anvilcraft_icon_stamping_platform": {
+            "textures": "textures/anvilcraft/icons/stamping_platform"
+        },
+        "anvilcraft_icon_unpacking_table": {
+            "textures": "textures/anvilcraft/icons/unpacking_table"
+        },
+        "anvilcraft_item_guide_book": {
+            "textures": "textures/anvilcraft/item/guide_book"
+        },
+        "anvilcraft_item_magnet_ingot": {
+            "textures": "textures/anvilcraft/item/magnet_ingot"
+        }
+    },
+    "texture_name": "atlas.terrain"
+}

@@ -1,0 +1,23 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "geometry": {
+                "material_0_0": "geometry.anvilcraft.held_chipped_anvil.material_0_0",
+                "material_1_0": "geometry.anvilcraft.held_chipped_anvil.material_1_0"
+            },
+            "identifier": "anvilcraft:held_chipped_anvil",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "render_controllers": [
+                "controller.render.anvilcraft.held_chipped_anvil.material_0",
+                "controller.render.anvilcraft.held_chipped_anvil.material_1"
+            ],
+            "textures": {
+                "material_0": "textures/blocks/anvil_base",
+                "material_1": "textures/blocks/anvil_top_damaged_1"
+            }
+        }
+    }
+}

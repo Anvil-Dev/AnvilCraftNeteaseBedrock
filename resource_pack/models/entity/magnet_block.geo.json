@@ -1,0 +1,185 @@
+{
+    "format_version": "1.21.0",
+    "minecraft:geometry": [
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -16,
+                                0,
+                                0
+                            ],
+                            "size": [
+                                16,
+                                16,
+                                16
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        16.0,
+                                        16.0
+                                    ],
+                                    "uv_size": [
+                                        -16.0,
+                                        -16.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.magnet_block.material_0_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -16,
+                                0,
+                                0
+                            ],
+                            "size": [
+                                16,
+                                16,
+                                16
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        16.0,
+                                        16.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        16.0,
+                                        16.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        16.0,
+                                        16.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        16.0,
+                                        16.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.magnet_block.material_1_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -16,
+                                0,
+                                0
+                            ],
+                            "size": [
+                                16,
+                                16,
+                                16
+                            ],
+                            "uv": {
+                                "up": {
+                                    "uv": [
+                                        16.0,
+                                        16.0
+                                    ],
+                                    "uv_size": [
+                                        -16.0,
+                                        -16.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.magnet_block.material_2_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        }
+    ]
+}

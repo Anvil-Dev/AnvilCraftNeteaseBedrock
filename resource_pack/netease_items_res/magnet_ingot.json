@@ -1,11 +1,11 @@
 {
+    "format_version": "1.10",
     "minecraft:item": {
+        "components": {
+            "minecraft:icon": "anvilcraft_magnet_ingot"
+        },
         "description": {
             "identifier": "anvilcraft:magnet_ingot"
-        },
-        "components": {
-            "minecraft:icon": "iron_ingot"
         }
-    },
-    "format_version": "1.10"
+    }
 }

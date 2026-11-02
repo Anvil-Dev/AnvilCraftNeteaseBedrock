@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""生成本项目自制的加工台模型、方块、战利品与合成配置。"""
+"""生成加工台方块、战利品与合成配置。"""
 
 import json
 import os
+from java_models import resource_config
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TABLES = (
-    ("stamping_platform", u"冲压平台", "iron_block", None),
-    ("crushing_table", u"粉碎台", "stone", "grindstone"),
-    ("sifting_table", u"过筛台", "scaffolding_top", "scaffolding"),
-    ("unpacking_table", u"解包台", "iron_trapdoor", "iron_trapdoor"),
+    ("stamping_platform", u"冲压平台", None),
+    ("crushing_table", u"粉碎台", "grindstone"),
+    ("sifting_table", u"过筛台", "scaffolding"),
+    ("unpacking_table", u"解包台", "iron_trapdoor"),
 )
 
 
@@ -24,12 +25,6 @@ def write(path, obj):
                       + u"\n").encode("utf-8"))
 
 
-def cube(origin, size, texture=0):
-    faces = {face: {"uv": [0, 0], "uv_size": [16, 16]} for face in (
-        "up", "down", "north", "south", "west", "east")}
-    return {"origin": origin, "size": size, "texture": texture, "uv": faces}
-
-
 def main():
     path = os.path.join(ROOT, "resource_pack", "blocks.json")
     if os.path.isfile(path):
@@ -38,7 +33,7 @@ def main():
     else:
         resources = {"format_version": [1, 1, 0]}
     names = []
-    for name, title, top, attachment in TABLES:
+    for name, title, attachment in TABLES:
         identifier = "anvilcraft:" + name
         components = {
             "minecraft:destroy_time": 2.0,
@@ -59,19 +54,7 @@ def main():
             "format_version": "1.10.0", "minecraft:block": {
                 "description": {"identifier": identifier, "category": "construction"},
                 "components": components}})
-        cubes = [cube([-8, 13, -8], [16, 3, 16], 1)]
-        cubes.extend(cube([x, 0, z], [3, 13, 3]) for x in (-7, 4) for z in (-7, 4))
-        if name == "crushing_table":
-            cubes.extend(cube([x, 10, -6], [3, 3, 12], 1) for x in (-6, 3))
-        elif name == "sifting_table":
-            cubes.extend(cube([x, 10, -6], [1, 3, 12], 1) for x in (-5, -1, 3))
-        elif name == "unpacking_table":
-            cubes.append(cube([-6, 10, -6], [12, 2, 12], 1))
-        write("resource_pack/models/netease_block/" + name + ".json", {
-            "format_version": "1.13.0", "netease:block_geometry": {
-                "description": {"identifier": identifier, "textures": ["iron_block", top], "use_ao": True},
-                "bones": [{"name": "table", "pivot": [0, 0, 0], "cubes": cubes}]}})
-        resources[identifier] = {"textures": "iron_block", "sound": "metal", "netease_model": identifier}
+        resources[identifier] = resource_config(name, "anvilcraft_block_processing_table_top")
         entries = ["anvilcraft:stamping_platform"]
         if attachment:
             entries.append("minecraft:" + attachment)

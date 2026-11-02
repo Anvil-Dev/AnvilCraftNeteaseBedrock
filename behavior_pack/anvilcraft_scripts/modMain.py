@@ -22,5 +22,6 @@ class AnvilCraftMod(object):
     @Mod.InitClient()
     def init_client(self):
         import mod.client.extraClientApi as client_api
+        client_api.RegisterSystem("AnvilCraft", "Visuals", "anvilcraft_scripts.client.visuals.VisualsSystem")
         logger.info("[AnvilCraft] client ready; addon=%s Minecraft=%s engine=%s",
                     VERSION, client_api.GetMinecraftVersion(), client_api.GetEngineVersion())

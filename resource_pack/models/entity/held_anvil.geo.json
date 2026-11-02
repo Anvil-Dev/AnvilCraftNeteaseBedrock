@@ -1,0 +1,350 @@
+{
+    "format_version": "1.21.0",
+    "minecraft:geometry": [
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -14,
+                                0,
+                                2
+                            ],
+                            "size": [
+                                12,
+                                4,
+                                12
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        14.0,
+                                        14.0
+                                    ],
+                                    "uv_rotation": 180,
+                                    "uv_size": [
+                                        -12.0,
+                                        -12.0
+                                    ]
+                                },
+                                "east": {
+                                    "uv": [
+                                        4.0,
+                                        2.0
+                                    ],
+                                    "uv_rotation": 270,
+                                    "uv_size": [
+                                        -4.0,
+                                        12.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        2.0,
+                                        12.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        4.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        2.0,
+                                        12.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        4.0
+                                    ]
+                                },
+                                "up": {
+                                    "uv": [
+                                        14.0,
+                                        14.0
+                                    ],
+                                    "uv_rotation": 180,
+                                    "uv_size": [
+                                        -12.0,
+                                        -12.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        0.0,
+                                        2.0
+                                    ],
+                                    "uv_rotation": 90,
+                                    "uv_size": [
+                                        4.0,
+                                        12.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -12,
+                                4,
+                                3
+                            ],
+                            "size": [
+                                8,
+                                1,
+                                10
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        5.0,
+                                        3.0
+                                    ],
+                                    "uv_rotation": 270,
+                                    "uv_size": [
+                                        -1.0,
+                                        10.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        4.0,
+                                        11.0
+                                    ],
+                                    "uv_size": [
+                                        8.0,
+                                        1.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        4.0,
+                                        11.0
+                                    ],
+                                    "uv_size": [
+                                        8.0,
+                                        1.0
+                                    ]
+                                },
+                                "up": {
+                                    "uv": [
+                                        12.0,
+                                        13.0
+                                    ],
+                                    "uv_rotation": 180,
+                                    "uv_size": [
+                                        -8.0,
+                                        -10.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        4.0,
+                                        3.0
+                                    ],
+                                    "uv_rotation": 90,
+                                    "uv_size": [
+                                        1.0,
+                                        10.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -10,
+                                5,
+                                4
+                            ],
+                            "size": [
+                                4,
+                                5,
+                                8
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        10.0,
+                                        4.0
+                                    ],
+                                    "uv_rotation": 270,
+                                    "uv_size": [
+                                        -5.0,
+                                        8.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        6.0,
+                                        6.0
+                                    ],
+                                    "uv_size": [
+                                        4.0,
+                                        5.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        6.0,
+                                        6.0
+                                    ],
+                                    "uv_size": [
+                                        4.0,
+                                        5.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        5.0,
+                                        4.0
+                                    ],
+                                    "uv_rotation": 90,
+                                    "uv_size": [
+                                        5.0,
+                                        8.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -13,
+                                10,
+                                0
+                            ],
+                            "size": [
+                                10,
+                                6,
+                                16
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        13.0,
+                                        16.0
+                                    ],
+                                    "uv_rotation": 180,
+                                    "uv_size": [
+                                        -10.0,
+                                        -16.0
+                                    ]
+                                },
+                                "east": {
+                                    "uv": [
+                                        16.0,
+                                        0.0
+                                    ],
+                                    "uv_rotation": 270,
+                                    "uv_size": [
+                                        -6.0,
+                                        16.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        3.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        10.0,
+                                        6.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        3.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        10.0,
+                                        6.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        10.0,
+                                        0.0
+                                    ],
+                                    "uv_rotation": 90,
+                                    "uv_size": [
+                                        6.0,
+                                        16.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.held_anvil.material_0_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -13,
+                                10,
+                                0
+                            ],
+                            "size": [
+                                10,
+                                6,
+                                16
+                            ],
+                            "uv": {
+                                "up": {
+                                    "uv": [
+                                        13.0,
+                                        16.0
+                                    ],
+                                    "uv_rotation": 180,
+                                    "uv_size": [
+                                        -10.0,
+                                        -16.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.held_anvil.material_1_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        }
+    ]
+}

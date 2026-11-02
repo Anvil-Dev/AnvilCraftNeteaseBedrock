@@ -1,0 +1,12 @@
+{
+    "resource_pack_name": "anvilcraft",
+    "texture_data": {
+        "anvilcraft_guide_book": {
+            "textures": "textures/anvilcraft/item/guide_book"
+        },
+        "anvilcraft_magnet_ingot": {
+            "textures": "textures/anvilcraft/item/magnet_ingot"
+        }
+    },
+    "texture_name": "atlas.items"
+}

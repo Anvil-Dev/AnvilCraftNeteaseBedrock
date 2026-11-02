@@ -1,0 +1,46 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "geometry": {
+                "material_0_0": "geometry.anvilcraft.chute.material_0_0",
+                "material_0_1": "geometry.anvilcraft.chute.material_0_1",
+                "material_1_0": "geometry.anvilcraft.chute.material_1_0",
+                "material_1_1": "geometry.anvilcraft.chute.material_1_1",
+                "material_2_0": "geometry.anvilcraft.chute.material_2_0",
+                "material_2_1": "geometry.anvilcraft.chute.material_2_1",
+                "material_3_0": "geometry.anvilcraft.chute.material_3_0",
+                "material_3_1": "geometry.anvilcraft.chute.material_3_1",
+                "material_4_0": "geometry.anvilcraft.chute.material_4_0",
+                "material_4_1": "geometry.anvilcraft.chute.material_4_1",
+                "material_5_0": "geometry.anvilcraft.chute.material_5_0",
+                "material_5_1": "geometry.anvilcraft.chute.material_5_1"
+            },
+            "identifier": "anvilcraft:chute",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "render_controllers": [
+                "controller.render.anvilcraft.chute.material_0",
+                "controller.render.anvilcraft.chute.material_1",
+                "controller.render.anvilcraft.chute.material_2",
+                "controller.render.anvilcraft.chute.material_3",
+                "controller.render.anvilcraft.chute.material_4",
+                "controller.render.anvilcraft.chute.material_5"
+            ],
+            "scripts": {
+                "initialize": [
+                    "variable.anvilcraft_down = 1;"
+                ]
+            },
+            "textures": {
+                "material_0": "textures/anvilcraft/block/chute",
+                "material_1": "textures/anvilcraft/block/chute_bottom",
+                "material_2": "textures/anvilcraft/block/chute_top",
+                "material_3": "textures/anvilcraft/block/chute_top_directional",
+                "material_4": "textures/anvilcraft/block/simple_chute",
+                "material_5": "textures/anvilcraft/block/simple_chute_directional"
+            }
+        }
+    }
+}

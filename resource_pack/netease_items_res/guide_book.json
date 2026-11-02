@@ -1,11 +1,11 @@
 {
     "format_version": "1.10",
     "minecraft:item": {
+        "components": {
+            "minecraft:icon": "anvilcraft_guide_book"
+        },
         "description": {
             "identifier": "anvilcraft:guide_book"
-        },
-        "components": {
-            "minecraft:icon": "book_written"
         }
     }
 }

@@ -9,10 +9,6 @@
 | 代码许可 | [LICENSE](LICENSE)，保留 `Copyright (c) 2024 Gugle`、LGPL 第 3 版和所附 GPL 第 3 版全文；文件头包含后续版本许可选项 |
 | 非代码资源许可 | [ASSETS_LICENSE](ASSETS_LICENSE)，原文为 `All rights reserved unless explicitly stated.` |
 
-上游 README 将代码和非代码资产分别指向这两份文件。复制纹理、模型、音效、语言文件等资源时，需要逐项记录来源、作者和适用授权；迁移时制作的新资源也按本仓库资源许可处理，另有说明的文件按其说明处理。
-
-调研文档记录玩法、源码位置和迁移方案。每次实际移植代码或引入资源时，需要记录上游路径、提交与修改内容，以便保留归属信息并跟踪更新。
-
 阶段 0 的方块粉碎沿用上述提交中 `src/generated/resources/data/anvilcraft/recipe/block_crush/gravel.json` 与 `sand.json` 的输入和产物，落地结算按网易事件在 Python 2.7 中重新实现。实验方块引用游戏自带的纹理图集，实验界面的 JSON 与中文名称由本项目编写。
 
 阶段 1 的原料与产物来自同一提交的 `recipe/block_crush/`、`recipe/item_compress/bone_block.json` 与 `recipe/unpack/`。加工位置按 `ItemCompressRecipe.java`、`UnpackRecipe.java` 和 AnvilLib 的世界配方范围换算。手册沿用 `anvilcraft:guide_book` 与上游根进度的首次入服奖励，正文和网易书本配置由本项目编写，图标引用游戏内置书本纹理。[上游配方目录](https://github.com/Anvil-Dev/AnvilCraft/tree/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/generated/resources/data/anvilcraft/recipe)
@@ -25,8 +21,8 @@
 
 方块涂抹采用同一提交的 `recipe/block_smear/` 与 `BlockSmearRecipe.java`，共 122 条原版配方。基岩版的悬挂砂轮状态、铜门双半转换、含水层与失败恢复均在本仓库用 Python 2.7 重写，手册正文由本项目编写。
 
-四种专用加工台按同一提交的 `ProcessingTableBlock.java`、`ProcessingTableBlockEntity.java`、`UseItemOnBlock.java` 与 `recipe/stamping_platform.json` 重写，接入 `recipe/item_crush/` 的 89 条原版配方及 `recipe/stamping/` 的 5 条原版配方。加工台模型、碰撞盒、手册与中文名称由本项目编写，模型直接引用游戏内置铁块、石头、脚手架和铁活板门纹理图集，未复制上游美术文件。
+四种专用加工台按同一提交的 `ProcessingTableBlock.java`、`ProcessingTableBlockEntity.java`、`UseItemOnBlock.java` 与 `recipe/stamping_platform.json` 重写，接入 `recipe/item_crush/` 的 89 条原版配方及 `recipe/stamping/` 的 5 条原版配方。手册与中文名称由本项目编写。
 
-磁铁、空心磁铁、雷击磁化与溜槽物流依据同一提交的 `MagnetBlock.java`、`HollowMagnetBlock.java`、`LightningEventListener.java`、`BaseChuteBlockEntity.java`、`ChuteBlockEntity.java` 和 `MagneticChuteBlockEntity.java` 重写。8 条相关合成配方取自上游默认 `recipe/` 目录。悬持方块、原版容器交换凭据、库存恢复与中文手册由本项目编写。新增模型由本项目制作，铁砧、铁块、红石块、漏斗与投掷器纹理通过游戏内置图集引用，未复制上游图片与模型。[上游机制源码](https://github.com/Anvil-Dev/AnvilCraft/tree/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/block) · [Mojang 目标版本纹理图集](https://github.com/Mojang/bedrock-samples/blob/v1.21.130.3/resource_pack/textures/terrain_texture.json)
+磁铁、空心磁铁、雷击磁化与溜槽物流依据同一提交的 `MagnetBlock.java`、`HollowMagnetBlock.java`、`LightningEventListener.java`、`BaseChuteBlockEntity.java`、`ChuteBlockEntity.java` 和 `MagneticChuteBlockEntity.java` 重写。8 条相关合成配方取自上游默认 `recipe/` 目录。悬持方块、原版容器交换凭据、库存恢复与中文手册由本项目编写。[上游机制源码](https://github.com/Anvil-Dev/AnvilCraft/tree/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/block)
 
 开发依赖 `mc-netease-sdk` 是网易发布的接口补全包，其版权与许可归属该依赖自身；游戏发布包通过网易运行环境调用 ModSDK。

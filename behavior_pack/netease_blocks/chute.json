@@ -8,8 +8,10 @@
         "components": {
             "netease:block_entity": {
                 "tick": true,
+                "client_tick": true,
                 "movable": false
             },
+            "minecraft:block_light_absorption": 0,
             "netease:listen_block_remove": {
                 "value": true
             },

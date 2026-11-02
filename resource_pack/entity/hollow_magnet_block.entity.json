@@ -1,0 +1,26 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "geometry": {
+                "material_0_0": "geometry.anvilcraft.hollow_magnet_block.material_0_0",
+                "material_1_0": "geometry.anvilcraft.hollow_magnet_block.material_1_0",
+                "material_2_0": "geometry.anvilcraft.hollow_magnet_block.material_2_0"
+            },
+            "identifier": "anvilcraft:hollow_magnet_block",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "render_controllers": [
+                "controller.render.anvilcraft.hollow_magnet_block.material_0",
+                "controller.render.anvilcraft.hollow_magnet_block.material_1",
+                "controller.render.anvilcraft.hollow_magnet_block.material_2"
+            ],
+            "textures": {
+                "material_0": "textures/anvilcraft/block/magnet_block_bottom",
+                "material_1": "textures/anvilcraft/block/magnet_block_side",
+                "material_2": "textures/anvilcraft/block/magnet_block_top"
+            }
+        }
+    }
+}
