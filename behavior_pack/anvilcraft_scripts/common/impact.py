@@ -4,6 +4,8 @@
 
 CRUSH_RESULTS = {"minecraft:cobblestone": "minecraft:gravel",
                  "minecraft:gravel": "minecraft:sand"}
+VANILLA_ANVILS = frozenset(("minecraft:anvil", "minecraft:chipped_anvil",
+                            "minecraft:damaged_anvil"))
 
 
 class FallingAnvils(object):
@@ -18,7 +20,9 @@ class FallingAnvils(object):
 
     def land(self, dimension, entity, name, pos):
         entry = self._starts.pop((dimension, str(entity)), None)
-        if entry is None or entry[0] != name or entry[1][1] <= pos[1]:
+        if entry is None or entry[1][1] <= pos[1]:
+            return None
+        if entry[0] != name and not (entry[0] in VANILLA_ANVILS and name in VANILLA_ANVILS):
             return None
         return (pos[0], pos[1] - 1, pos[2])
 
@@ -38,10 +42,13 @@ class FallingAnvils(object):
                 del self._starts[key]
 
 
-def crush_at(blocks, dimension, pos):
+def crush_at(blocks, dimension, pos, expected=None):
     """只替换两条上游配方明确列出的原料；区块未加载时不写入。"""
     current = blocks.GetBlockNew(pos, dimension)
-    result = CRUSH_RESULTS.get(current.get("name")) if current else None
+    name = current.get("name") if current else None
+    if expected is not None and name != expected:
+        return None
+    result = CRUSH_RESULTS.get(name)
     if result and blocks.SetBlockNew(pos, {"name": result, "aux": 0}, 0, dimension, True):
         return result
     return None

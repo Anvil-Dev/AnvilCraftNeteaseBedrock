@@ -64,7 +64,7 @@
 
 上游通过 `FallingBlockEntityMixin` 在铁砧落地时抛出 `AnvilEvent.OnLand`，由 `AnvilEventListener` 依次分发切石机破坏、多步加工、世界配方与特定方块响应（S5）。在网易基岩版中，我们在服务端建立统一的下落跟踪与配方结算模块，将引擎底层下落事件封装为包含维度、落点坐标、下落高度、下方加工台方块和周围掉落物列表的结算上下文。
 
-网易自定义重力方块需要配置 `base_block: custom_heavy_block` 与 `netease:fall.send_python_event: true`，引擎会触发开始下落、落地还原、变更为掉落物和落地伤害四个事件（N2、N3）。落地事件虽然带有 `fallTickAmount`，但精确下落高度仍需记录开始下落时的起始坐标并与落点坐标求差。阶段 0 需优先验证原版铁砧能否直接触发上述 Python 事件；若原版铁砧不支持，则引导玩家合成或自动替换为自定义工艺铁砧。
+网易自定义重力方块需要配置 `base_block: custom_heavy_block` 与 `netease:fall.send_python_event: true`，引擎会触发开始下落、落地还原、变更为掉落物和落地伤害四个事件（N2、N3）。落地事件虽然带有 `fallTickAmount`，但精确下落高度仍需记录开始下落时的起始坐标并与落点坐标求差。主包也通过 `AddEntityServerEvent` 识别原版铁砧的下落实体，跟踪脚下方块，在实体消失后核对落点是否实际出现铁砧，再按同一实体 ID 结算。覆盖完整、开裂和损坏的原版铁砧，专用重力事件与实体事件共用同一条下落记录。[网易世界事件](https://mc.163.com/dev/mcmanual/mc-dev/mcdocs/1-ModAPI/事件/世界.html) · [实体类型接口](https://mc.163.com/dev/mcmanual/mc-dev/mcdocs/1-ModAPI/接口/实体/实体类型.html#getentitynbttags)
 
 配方表在服务端启动时按加工类型、下方平台方块和输入物品 ID 建立内存索引。单次铁砧下落最多触发一次结算：先校验所有输入物品和方块仍然存在、数量充足且输出位置可容纳，校验通过后一次性扣除输入并生成产物。若物品带有附魔、耐久或自定义 `userData`，先完整读取其数据字典，再按具体配方规则保留或修改字段。
 

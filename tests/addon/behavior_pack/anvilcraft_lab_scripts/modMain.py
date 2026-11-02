@@ -5,7 +5,7 @@
 from mod.common.mod import Mod
 
 
-@Mod.Binding(name="AnvilCraftLab", version="0.1.0")
+@Mod.Binding(name="AnvilCraftLab", version="0.1.1")
 class LabMod(object):
 
     @Mod.InitServer()

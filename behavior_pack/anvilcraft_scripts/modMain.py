@@ -5,8 +5,10 @@
 from mod.common.mod import Mod
 from mod_log import logger
 
+VERSION = "0.1.1"
 
-@Mod.Binding(name="AnvilCraft", version="0.1.0")
+
+@Mod.Binding(name="AnvilCraft", version=VERSION)
 class AnvilCraftMod(object):
 
     @Mod.InitServer()
@@ -18,5 +20,5 @@ class AnvilCraftMod(object):
     @Mod.InitClient()
     def init_client(self):
         import mod.client.extraClientApi as client_api
-        logger.info("[AnvilCraft] client ready; Minecraft=%s engine=%s",
-                    client_api.GetMinecraftVersion(), client_api.GetEngineVersion())
+        logger.info("[AnvilCraft] client ready; addon=%s Minecraft=%s engine=%s",
+                    VERSION, client_api.GetMinecraftVersion(), client_api.GetEngineVersion())

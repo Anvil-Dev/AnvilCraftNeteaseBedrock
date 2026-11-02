@@ -96,3 +96,14 @@ git diff --check
 3. 从作品库选择导入的组件，启动「开发测试」。进入世界后，在 Mod 日志中查看 `[AnvilCraft] server ready` 和 `[AnvilCraft] client ready`。如需测试重力铁砧和检测台，再单独导入 `dist/AnvilCraft-Lab-Studio.zip`，在同一测试世界启用主包和实验包。
 
 工作台通过行为包的 `entities/` 和资源包的 `textures/` 识别包类型，每个目录都与各自的 `manifest.json` 同级。仓库沿用网易模板中的空文件 `.dummy`，使 Git 检出、打包和工作台复制都保留这两个目录。出现「缺少 Manifest 配置文件」时，先核对所选 ZIP 解压后的这两组路径。[网易附加包结构与导入说明](https://mc.163.com/dev/mcmanual/mc-dev/mconline/10-addon教程/第18章：打包导出你的作品/课程01.包体的结构和导入.html?catalog=1)
+
+### 复测原版铁砧粉碎
+
+在 3.10 创造测试存档中，把圆石（`minecraft:cobblestone`）放在地上，让原版铁砧从它正上方三格自由落下。第一次应得到沙砾。移开铁砧，保持沙砾在原位，再落一次应得到沙子。用普通石头（`minecraft:stone`）做对照时，石头应保持原样。测试世界启用命令后，也可站在平地上保持不动，依次运行以下两条命令布置第一次下落。
+
+```text
+/setblock ~2 ~ ~ minecraft:cobblestone
+/setblock ~2 ~4 ~ minecraft:anvil
+```
+
+2026-11-02 的 PC 测试日志确认基岩引擎 `1.21.130.0` 已加载主包两端。旧版服务端每次收到无参数的 `OnScriptTickServer` 都抛出 `TypeError: _advance() takes exactly 2 arguments (1 given)`。修复版客户端启动行包含 `addon=0.1.1`。服务端识别原版下落实体后记录 `falling anvil`，加工成功记录 `crush` 和产物 ID，输入未匹配或替换失败则记录 `no crush` 和脚下方块 ID。
