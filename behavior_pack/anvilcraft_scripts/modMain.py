@@ -5,7 +5,7 @@
 from mod.common.mod import Mod
 from mod_log import logger
 
-VERSION = "0.4.0"
+VERSION = "0.1.0"
 
 
 @Mod.Binding(name="AnvilCraft", version=VERSION)

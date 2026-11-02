@@ -91,6 +91,8 @@ git diff --check
 
 ## 在 MC Studio 导入附加包
 
+开发阶段使用 Git 提交追踪功能进度，主包、资源包和实验包统一使用 `0.1.0`。维护者明确发布版本后，再统一更新包清单、依赖版本与 `Mod.Binding`。
+
 1. 在仓库根目录运行 `python -B tools/package_addon.py`。
 2. 打开工作台的「本地导入」，选择基岩版附加包，勾选「复制文件到默认文件夹」，选择 `dist/AnvilCraft-Studio.zip`。使用文件夹导入时，先将此 ZIP 单独解压，选择直接包含两个包目录的那一级。
 3. 从作品库选择导入的组件，启动「开发测试」。进入世界后，在 Mod 日志中查看 `[AnvilCraft] server ready` 和 `[AnvilCraft] client ready`。如需测试重力铁砧和检测台，再单独导入 `dist/AnvilCraft-Lab-Studio.zip`，在同一测试世界启用主包和实验包。
@@ -99,7 +101,7 @@ git diff --check
 
 ### 复测原版铁砧粉碎
 
-2026-11-02，主包 `0.1.1` 在网易 3.10 PC 客户端通过手动复测。测试时将圆石（`minecraft:cobblestone`）放在地上，让原版铁砧从圆石正上方三格自由落下。第一次落下后，圆石变成沙砾（`minecraft:gravel`）。再次落下后，沙砾变成沙子（`minecraft:sand`）。
+2026-11-02，开发包在网易 3.10 PC 客户端通过手动复测。测试时将圆石（`minecraft:cobblestone`）放在地上，让原版铁砧从圆石正上方三格自由落下。第一次落下后，圆石变成沙砾（`minecraft:gravel`）。再次落下后，沙砾变成沙子（`minecraft:sand`）。
 
 在启用命令的测试世界中，站在平地上保持不动，依次运行以下两条命令即可复现第一次下落。普通石头（`minecraft:stone`）可用于单独的对照测试，预期保持原样。
 
@@ -108,13 +110,13 @@ git diff --check
 /setblock ~2 ~4 ~ minecraft:anvil
 ```
 
-2026-11-02 的 PC 测试日志确认基岩引擎 `1.21.130.0` 已加载主包两端。旧版服务端每次收到无参数的 `OnScriptTickServer` 都抛出 `TypeError: _advance() takes exactly 2 arguments (1 given)`。修复版客户端启动行包含 `addon=0.1.1`。服务端识别原版下落实体后记录 `falling anvil`，加工成功记录 `crush` 和产物 ID，输入未匹配或替换失败则记录 `no crush` 和脚下方块 ID。
+2026-11-02 的 PC 测试日志确认基岩引擎 `1.21.130.0` 已加载主包两端。旧版服务端每次收到无参数的 `OnScriptTickServer` 都抛出 `TypeError: _advance() takes exactly 2 arguments (1 given)`。服务端识别原版下落实体后记录 `falling anvil`，加工成功记录 `crush` 和产物 ID，输入未匹配或替换失败则记录 `no crush` 和脚下方块 ID。
 
-主包行为包 `0.4.0` 搭配资源包 `0.2.0`，客户端启动行包含 `addon=0.4.0`。首次进入该世界的玩家会收到手册。加工日志中的 `item process` 记录物品配方 ID、份数和每种产物的总量，`block process` 记录压合或压榨配方 ID。旧版欠发记录中的西瓜片随补发迁移到 `minecraft:melon_slice`。[配方与复测方法](recipes.md)
+主包行为包与资源包均使用 `0.1.0`，客户端启动行包含 `addon=0.1.0`。首次进入该世界的玩家会收到手册。加工日志中的 `item process` 记录物品配方 ID、份数和每种产物的总量，`block process` 记录压合或压榨配方 ID。旧版欠发记录中的西瓜片随补发迁移到 `minecraft:melon_slice`。[配方与复测方法](recipes.md)
 
 如果引擎拒绝生成产物或返还余料，服务端会把欠发物品保存到世界扩展数据 `anvilcraft:pending_drops_v1`，在目标区块加载后重试。如果补发已生成实体、存档写入和实体撤销又同时失败，`spawned item could not be retracted` 日志会列出实体 ID 和原始记录。此时先恢复存档写入并核对该物品，再重启世界。引擎的存档写入和掉落物生成分属两次调用，硬崩溃窗口需在存档回归时单独验证。
 
-`0.4.0` 的双方块修改先把原状态与目标状态写入世界数据 `anvilcraft:pending_block_changes_v1`。写入中断时恢复本次已修改的格子，若恢复也失败，则锁定对应位置，待区块加载和接口恢复后重试。已被玩家或其他脚本修改成不同内容的格子会保留当前内容，日志中的 `block recovery conflict` 会列出原始凭据与现场状态。方块、锅状态与世界数据分别由引擎接口写入，进程硬崩溃时的落盘顺序仍需在客户端存档中验证。
+双方块修改先把原状态与目标状态写入世界数据 `anvilcraft:pending_block_changes_v1`。写入中断时恢复本次已修改的格子，若恢复也失败，则锁定对应位置，待区块加载和接口恢复后重试。已被玩家或其他脚本修改成不同内容的格子会保留当前内容，日志中的 `block recovery conflict` 会列出原始凭据与现场状态。方块、锅状态与世界数据分别由引擎接口写入，进程硬崩溃时的落盘顺序仍需在客户端存档中验证。
 
 ## 复核原版落砧配方
 

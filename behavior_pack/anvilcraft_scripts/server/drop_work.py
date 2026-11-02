@@ -27,7 +27,7 @@ class DropDelivery(object):
         if self._store is None:
             self._store = self._factory.CreateExtraData(self._level)
             self.pending = self._store.GetExtraData(self.KEY) or []
-            # 0.2.0 欠发的西瓜片使用旧 ID，随本次补发写回当前存档。
+            # 旧 ID 的西瓜片需要先迁移，再补发并写回存档。
             for _, _, item in self.pending:
                 if item.get("newItemName") == "minecraft:melon":
                     item["newItemName"] = "minecraft:melon_slice"
