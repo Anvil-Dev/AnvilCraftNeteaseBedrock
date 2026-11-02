@@ -3,6 +3,7 @@
 """在落点处理掉落物，扣料失败时退回已收原料，保留未能生成的物品。"""
 
 from math import floor
+from collections import Counter
 
 from anvilcraft_scripts.common.drop_recipes import (
     CAULDRON, Drop, RECIPES, in_recipe_area, match_drops, products, usable_platform,
@@ -188,8 +189,11 @@ class DropWork(object):
             return
         x, y, z = pos
         output_pos = (x + 0.5, y + (0.25 if platform == CAULDRON else 0), z + 0.5)
-        change.extend((output_pos, item) for item in products(batch))
+        output = list(products(batch))
+        change.extend((output_pos, item) for item in output)
         self._delivery.send(dim, change)
+        totals = Counter()
+        for item in output:
+            totals[item["newItemName"]] += item["count"]
         self._log.info("[AnvilCraft] item process dim=%s pos=%s recipe=%s batches=%d results=%s",
-                       dim, pos, batch.recipe.source, batch.times,
-                       [(name, count * batch.times) for name, count in batch.recipe.outputs])
+                       dim, pos, batch.recipe.source, batch.times, sorted(totals.items()))

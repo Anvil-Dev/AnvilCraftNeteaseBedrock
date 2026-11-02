@@ -12,8 +12,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 sys.path.insert(0, os.path.join(ROOT, "behavior_pack"))
 
-from anvilcraft_scripts.common.drop_recipes import Drop, RECIPES, match_drops, products
-from sync_vanilla_recipes import explicit, wrap
+from anvilcraft_scripts.common.drop_recipes import Drop, RECIPES, SCAFFOLDING, match_drops, products
+from sync_vanilla_recipes import explicit, generated_mesh, output_count, wrap
 
 
 class VanillaRecipeTests(unittest.TestCase):
@@ -29,9 +29,41 @@ class VanillaRecipeTests(unittest.TestCase):
                     self.assertEqual(recipe.source, batch.recipe.source)
                     self.assertItemsEqual([(d, d.item["count"]) for d in drops], batch.debits)
                     result = Counter()
-                    for item in products(batch):
+                    for item in products(batch, roll=lambda: 0):
                         result[item["newItemName"]] += item["count"]
-                    self.assertEqual(dict(recipe.outputs), dict(result), recipe.source)
+                    expected = {}
+                    for name, count in recipe.outputs:
+                        expected[name] = count["n"] if isinstance(count, dict) else count
+                    self.assertEqual(expected, dict(result), recipe.source)
+
+    def test_mesh_rolls_each_result_for_each_input_with_strict_probability_boundaries(self):
+        drop = Drop("gravel", (), {"newItemName": "minecraft:gravel", "count": 2})
+        batch = match_drops(SCAFFOLDING, [drop])
+        rolls = iter((0.49, 0.5, 0.249, 0.25, 0.199, 0.2))
+        result = list(products(batch, roll=rolls.next))
+        self.assertEqual([("minecraft:gravel", 1), ("minecraft:flint", 1), ("minecraft:iron_nugget", 1)],
+                         [(item["newItemName"], item["count"]) for item in result])
+        self.assertEqual([(drop, 2)], batch.debits)
+
+    def test_mesh_limit_and_empty_roll_results(self):
+        drop = Drop("sand", (), {"newItemName": "minecraft:sand", "count": 65})
+        batch = match_drops(SCAFFOLDING, [drop])
+        self.assertEqual((64, [(drop, 64)]), (batch.times, batch.debits))
+        self.assertEqual([], list(products(batch, roll=lambda: 0.99)))
+        self.assertEqual([64, 64, 64], [item["count"] for item in products(batch, roll=lambda: 0)])
+
+    def test_generated_mesh_follows_upstream_tree_ids_and_normalizes_binomial_counts(self):
+        tags = {"minecraft:leaves": [{"values": ["minecraft:oak_leaves", "minecraft:mangrove_leaves",
+                                               "minecraft:flowering_azalea_leaves"]}],
+                "minecraft:saplings": [{"values": ["minecraft:oak_sapling", "minecraft:mangrove_propagule",
+                                                   "minecraft:flowering_azalea"]}]}
+        generated = list(generated_mesh(tags))
+        plants = [result["id"] for _, recipe in generated for result in recipe["results"][1:]]
+        self.assertItemsEqual(["minecraft:oak_sapling", "minecraft:flowering_azalea"], plants)
+        count = output_count({"type": "minecraft:binomial", "n": 1.0, "p": 0.2})
+        self.assertEqual(1, count["n"])
+        self.assertIsInstance(count["n"], int)
+        self.assertRaises(ValueError, output_count, {"type": "minecraft:uniform", "min": 1, "max": 2})
 
     def test_shaped_compression_uses_only_the_common_vanilla_ingredient(self):
         iron = "minecraft:iron_ingot"

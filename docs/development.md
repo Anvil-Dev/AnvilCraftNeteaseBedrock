@@ -116,6 +116,8 @@ git diff --check
 
 如果引擎拒绝生成产物或返还余料，服务端会把欠发物品保存到世界扩展数据 `anvilcraft:pending_drops_v1`，在目标区块加载后重试。如果补发已生成实体、存档写入和实体撤销又同时失败，`spawned item could not be retracted` 日志会列出实体 ID 和原始记录。此时先恢复存档写入并核对该物品，再重启世界。引擎的存档写入和掉落物生成分属两次调用，硬崩溃窗口需在存档回归时单独验证。
 
+筛分在本批原料全部扣除后逐份抽取产物，日志记录实际抽中的物品总数。欠发记录保存具体物品和数量，重进和重试沿用这些数量。随机抽取的结果允许为空，这种情况也会正常消耗原料。
+
 双方块修改先把原状态与目标状态写入世界数据 `anvilcraft:pending_block_changes_v1`。写入中断时恢复本次已修改的格子，若恢复也失败，则锁定对应位置，待区块加载和接口恢复后重试。已被玩家或其他脚本修改成不同内容的格子会保留当前内容，日志中的 `block recovery conflict` 会列出原始凭据与现场状态。方块、锅状态与世界数据分别由引擎接口写入，进程硬崩溃时的落盘顺序仍需在客户端存档中验证。
 
 ## 复核原版落砧配方
@@ -131,4 +133,4 @@ $blocks = '.sdk/bedrock-1.21.130.3/mojang-blocks.json'
 python -B tools/sync_vanilla_recipes.py --minecraft $mc --neoforge $neo --anvilcraft ../AnvilCraft --bedrock-items $items --bedrock-blocks $blocks --check
 ```
 
-`--check` 将重新计算的原料、产物和匹配顺序与仓库中的配方表逐项比对。去掉该参数即可重建配方表。基线输出为 `crush=12 compress=33 unpack=54 block_compress=9 squeezing=4`。
+`--check` 将重新计算的原料、产物和匹配顺序与仓库中的配方表逐项比对。去掉该参数即可重建配方表。基线输出为 `crush=12 compress=33 unpack=54 mesh=12 block_compress=9 squeezing=4`。

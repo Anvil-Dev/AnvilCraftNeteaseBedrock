@@ -1,14 +1,15 @@
 # 生存加工配方
 
-当前开发代码接入 112 条原料和产物均为原版物品或方块的配方。首次进入世界会获得《铁砧工艺手册》（`anvilcraft:guide_book`），可按平台查阅配方。
+当前开发代码接入 124 条原料和产物均为原版物品或方块的配方。首次进入世界会获得《铁砧工艺手册》（`anvilcraft:guide_book`），可按平台查阅配方。
 
-| 加工平台 | 上游直接定义 | 上游从工作台配方转换 | 网易 3.10 可用 |
+| 加工平台 | 上游直接定义 | 上游动态生成 | 网易 3.10 可用 |
 | --- | ---: | ---: | ---: |
 | 方块粉碎 | 12 | 0 | 12 |
 | 空炼药锅压缩 | 1 | 32 | 33 |
 | 铁活板门解包 | 15 | 40 | 54 |
 | 双方块压合 | 9 | 0 | 9 |
 | 炼药锅方块压榨 | 4 | 0 | 4 |
+| 脚手架筛分 | 3 | 9 | 12 |
 
 上游有 1 条动力矿车（`minecraft:furnace_minecart`）解包配方。基岩 1.21.130 没有这个原版物品，因此可用的矿车解包配方有 3 条。清单以上游默认启用的数据包为准，木材标签中的原木、木头和去皮变种合计为同一条配方。[基岩版物品注册表](https://github.com/Mojang/bedrock-samples/blob/v1.21.130.3/metadata/vanilladata_modules/mojang-items.json) · [上游工作台配方转换逻辑](https://github.com/Anvil-Dev/AnvilCraft/blob/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/recipe/anvil/wrap/VanillaRecipesWrap.java)
 
@@ -121,6 +122,21 @@
 
 上游这四条配方各产生 250 mB（四分之一桶），普通锅按自身显示层数取整。移植沿用普通锅的显示结果，水和细雪从空锅开始每次增加一层，三次装满；熔岩一次装满。基岩版用同一 `minecraft:cauldron` 方块的 `cauldron_liquid` 区分流体，水和细雪每层对应两个 `fill_level` 刻度，满锅为 6。服务端通过 `SetBlockStates` 修改锅状态，保留方块实体数据。[上游普通锅液量换算](https://github.com/Anvil-Dev/AnvilCraft/blob/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/recipe/anvil/predicate/block/HasCauldron.java) · [目标基岩版方块状态](https://github.com/Mojang/bedrock-samples/blob/v1.21.130.3/metadata/vanilladata_modules/mojang-blocks.json)
 
+## 脚手架筛分
+
+在侧面立起脚手架支柱，向旁边伸出一格作为筛网，让下方留出收集空间。把原料物品丢在筛网中央，再让铁砧落在脚手架上。原料放置后每份消耗 1 个物品，一次落砧选择一种配方，最多 64 份。各份原料的每种产物都独立抽取，可能同时产生多种产物，也可能全部未抽中。
+
+| 原料 | 每份独立产出概率 | 上游配方 |
+| --- | --- | --- |
+| 沙砾 | 沙砾 50%、燧石 25%、铁粒 20% | `mesh/gravel` |
+| 沙子 | 沙子 50%、黏土球 25%、金粒 5% | `mesh/sand` |
+| 灵魂沙 | 灵魂沙 50%、下界疣 0.5% | `mesh/soul_sand` |
+| 橡木、云杉、白桦、丛林、金合欢、深色橡木、樱花树叶 | 原树叶 50%、对应树苗 20% | `mesh/generated/minecraft/oak_leaves` 等，共 7 条 |
+| 杜鹃树叶 | 杜鹃树叶 50%、杜鹃花丛 20% | `mesh/generated/minecraft/azalea_leaves` |
+| 开花杜鹃树叶 | 开花杜鹃树叶 50%、盛开的杜鹃花丛 20% | `mesh/generated/minecraft/flowering_azalea_leaves` |
+
+红沙筛分包含上游模组的铜粒产物，因此按原版范围筛选规则排除整条配方。红树繁殖体的 ID 未与上游树种关联规则匹配，当前基线保留这一差异。服务端保存已抽中的欠发数量，重进后按原数量补发。[上游动态树叶配方](https://github.com/Anvil-Dev/AnvilCraft/blob/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/recipe/generate/MeshRecipeGeneratingCache.java)
+
 ## 验收记录
 
-圆石→沙砾→沙子已在网易 3.10 PC 客户端通过手动复测。112 条配方已与上游默认数据和目标注册表核对。Python 2.7 回放验证了落地触发、加工优先级、上下顺序、锅内液体保护、分堆扣料、物品变种、双产物和失败恢复。新增配方与手册的游戏内表现待客户端确认。[圆石粉碎复测记录](development.md#复测原版铁砧粉碎)
+圆石→沙砾→沙子已在网易 3.10 PC 客户端通过手动复测。124 条配方已与上游默认数据和目标注册表核对。Python 2.7 回放验证了落地触发、加工优先级、上下顺序、锅内液体保护、分堆扣料、物品变种、双产物、概率边界、零产物和跨存档补发。新增配方与手册的游戏内表现待客户端确认。[圆石粉碎复测记录](development.md#复测原版铁砧粉碎)

@@ -21,4 +21,6 @@
 
 双方块压合与原版方块压榨采用同一提交的 `recipe/block_compress/`、`recipe/squeezing/`，以及 `tags/block/mushroom_block.json` 和 Java 原版 `minecraft:leaves` 标签。上下方块的位置、结果位置和原版锅的流体显示层数按 `BlockCompressRecipe.java`、`SqueezingRecipe.java`、`HasCauldron.java` 换算，网易事务恢复与手册正文由本项目编写。[上游配方实现](https://github.com/Anvil-Dev/AnvilCraft/tree/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/recipe/anvil/wrap)
 
+脚手架筛分采用同一上游提交的 `recipe/mesh/` 原版配方，树叶配方按 `MeshRecipeGeneratingCache.java` 的树种 ID 关联规则生成，原料和产物由 Java 1.21.1 的默认标签与基岩注册表核对。每份原料的独立概率由 Python 标准库重新实现，补发保存已抽出的物品数量。新增手册正文由本项目编写。[上游筛分实现](https://github.com/Anvil-Dev/AnvilCraft/blob/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/recipe/anvil/wrap/MeshRecipe.java) · [上游树叶生成规则](https://github.com/Anvil-Dev/AnvilCraft/blob/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/recipe/generate/MeshRecipeGeneratingCache.java)
+
 开发依赖 `mc-netease-sdk` 是网易发布的接口补全包，其版权与许可归属该依赖自身；游戏发布包通过网易运行环境调用 ModSDK。

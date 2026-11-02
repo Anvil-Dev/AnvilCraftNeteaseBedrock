@@ -4,6 +4,7 @@
 
 import copy
 import logging
+import random
 import unittest
 
 from test_impact_events import Engine, ImpactEvents
@@ -46,6 +47,12 @@ class Workshop(Engine):
 
     def CreateEngineType(self, entity):
         return self.drops.get(entity)
+
+    def CreateBlock(self, level):
+        return self
+
+    def LookupBlocksByBlockTag(self, tag):
+        return []
 
     def CreateDimension(self, entity):
         return self.drops.get(entity)
@@ -196,6 +203,56 @@ class WorkTests(unittest.TestCase):
         self.fall()
         self.assertEqual([16] * 16, [d.item["count"] for d in self.stacks("snowball")])
         self.assertEqual([1], [d.item["count"] for d in self.stacks("snow")])
+
+    def test_mesh_pending_outputs_keep_the_original_rolls_after_reload(self):
+        self.addCleanup(random.setstate, random.getstate())
+        random.seed(0)
+        self.platform("scaffolding", {})
+        self.drop("1", "sand", 64, pos=(-0.5, 64, 1.5))
+        self.world.refuse.update(("minecraft:sand", "minecraft:clay_ball", "minecraft:gold_nugget"))
+        self.fall()
+        key = "anvilcraft:pending_drops_v1"
+        credit = copy.deepcopy(self.world.save[key])
+        self.assertTrue(credit)
+        self.assertFalse(self.world.drops)
+        self.bind()
+        self.fire["LoadServerAddonScriptsAfter"]({})
+        random.seed(99)
+        self.world.refuse.clear()
+        self.world.loaded = False
+        self.tick_for(30)
+        self.assertFalse(self.world.drops)
+        self.world.loaded = True
+        self.tick_for(120)
+        expected = {}
+        for _, _, item in credit:
+            name = item["newItemName"].split(":")[1]
+            expected[name] = expected.get(name, 0) + item["count"]
+        for name, count in expected.items():
+            self.assertEqual(count, sum(drop.item["count"] for drop in self.stacks(name)))
+            self.assertTrue(all(drop.pos == (-0.5, 63, 1.5) for drop in self.stacks(name)))
+        self.assertEqual([], self.world.save[key])
+
+    def test_mesh_zero_output_still_consumes_one_recipe_per_native_landing(self):
+        self.addCleanup(random.setstate, random.getstate())
+        random.seed(0)
+        self.platform("scaffolding", {})
+        self.drop("1", "gravel", 1, pos=(-0.5, 64, 1.5))
+        self.drop("2", "oak_leaves", 1, pos=(-0.5, 64, 1.5))
+        for entity in ("41", "42"):
+            self.fire["AddEntityServerEvent"](dict(
+                id=entity, engineTypeStr="minecraft:falling_block",
+                posX=-0.5, posY=68.5, posZ=1.5, dimensionId=1))
+        self.world.actor.feet = (-0.5, 64.1, 1.5)
+        self.fire["OnScriptTickServer"]()
+        self.world.cells[1, (-1, 64, 1)] = "minecraft:anvil"
+        for entity in ("41", "42"):
+            self.fire["EntityRemoveEvent"]({"id": entity})
+        self.tick_for(90)
+        self.assertNotIn("1", self.world.drops)
+        self.assertEqual(["2"], self.world.drops.keys())
+        self.assertEqual(1, self.world.drops["2"].item["count"])
+        self.assertFalse(self.world.save.get("anvilcraft:pending_drops_v1"))
 
     def test_iron_compresses_and_unpacks_one_step_per_fall(self):
         self.drop("1", "iron_ingot", 8)

@@ -132,7 +132,7 @@ def explicit(recipe, tags):
                 raise ValueError("unsupported block predicate: %r" % recipe)
             if block.startswith(MC):
                 return "crush", [({block}, 1)], [(name, 1)]
-    if kind in ("anvilcraft:item_compress", "anvilcraft:unpack"):
+    if kind in ("anvilcraft:item_compress", "anvilcraft:unpack", "anvilcraft:mesh"):
         outputs = [(item["id"], item.get("count", 1)) for item in recipe["results"]]
         if all(name.startswith(MC) for name, _ in outputs):
             groups = [(vanilla_items(slot["items"], tags), slot.get("count", 1))
@@ -141,7 +141,35 @@ def explicit(recipe, tags):
                 if any(set(out) - {"id", "count"} for out in recipe["results"]) or any(
                         set(slot) - {"items", "count"} for slot in recipe["ingredients"]):
                     raise ValueError("unsupported item properties: %r" % recipe)
+                outputs = [(name, output_count(count)) for name, count in outputs]
                 return kind.split(":")[1].replace("item_compress", "compress"), groups, outputs
+
+
+def output_count(value):
+    if isinstance(value, (int, long)) and value > 0:
+        return value
+    if (isinstance(value, dict) and set(value) == {"type", "n", "p"}
+            and value["type"] == MC + "binomial" and value["n"] == int(value["n"])
+            and value["n"] >= 0 and 0 <= value["p"] <= 1):
+        return {"type": MC + "binomial", "n": int(value["n"]), "p": value["p"]}
+    raise ValueError("unsupported output count: %r" % value)
+
+
+def generated_mesh(tags):
+    leaves = vanilla_items("#minecraft:leaves", tags)
+    saplings = vanilla_items("#minecraft:saplings", tags)
+    for leaf in sorted(leaves):
+        tree = leaf.rsplit("_", 1)[0]
+        plants = [plant for plant in sorted(saplings) if tree == (
+            plant.rsplit("_", 1)[0] if "sapling" in plant else plant)]
+        if not plants:
+            continue
+        # 与上游按树种 ID 关联树叶和树苗的规则一致，保留每种产物的独立概率。
+        results = [{"id": leaf, "count": {"type": MC + "binomial", "n": 1, "p": 0.5}}]
+        results.extend({"id": plant, "count": {"type": MC + "binomial", "n": 1, "p": 0.2}}
+                       for plant in plants)
+        yield "anvilcraft:mesh/generated/" + leaf.replace(":", "/"), {
+            "type": "anvilcraft:mesh", "ingredients": [{"items": leaf}], "results": results}
 
 
 def bedrock_id(name, registry):
@@ -151,13 +179,13 @@ def bedrock_id(name, registry):
     return native
 
 
-def compile_recipes(recipes, tags, registry):
+def compile_recipes(recipes, tags, registry, block_tags):
     compressible = vanilla_items("#anvilcraft:compress_item", tags)
     storage = vanilla_items("#c:storage_blocks", tags)
     if not compressible or not storage:
         raise ValueError("missing compression tags")
     catalog = defaultdict(list)
-    for source, recipe in sorted(recipes.items()):
+    for source, recipe in sorted(list(recipes.items()) + list(generated_mesh(block_tags))):
         match = explicit(recipe, tags)
         if not match:
             match = wrap(recipe, compressible, storage, tags)
@@ -228,11 +256,11 @@ def render(catalog, compressed, squeezed):
             raise ValueError("unsupported block replacement: %r" % groups)
         lines.append('    "%s": "%s",' % (names[0], results[0][0]))
     lines.append("}")
-    for kind in ("compress", "unpack"):
+    for kind in ("compress", "unpack", "mesh"):
         lines.extend(["", kind.upper() + " = ("])
         for source, groups, results in catalog[kind]:
-            lines.extend(['    ("%s",' % source, "     %s," % json.dumps(groups),
-                          "     %s)," % json.dumps(results)])
+            lines.extend(['    ("%s",' % source, "     %s," % json.dumps(groups, sort_keys=True),
+                          "     %s)," % json.dumps(results, sort_keys=True)])
         lines.append(")")
     lines.extend(["", "BLOCK_COMPRESS = ("])
     for source, upper, lower, result in compressed:
@@ -261,7 +289,7 @@ def main():
     recipes, tags, block_tags = load_packs(paths)
     with open(args.bedrock_items, "rb") as handle:
         registry = {row["name"] for row in json.load(handle)["data_items"]}
-    catalog = compile_recipes(recipes, tags, registry)
+    catalog = compile_recipes(recipes, tags, registry, block_tags)
     with open(args.bedrock_blocks, "rb") as handle:
         blocks = {row["name"] for row in json.load(handle)["data_items"]}
     compressed, squeezed = compile_blocks(recipes, block_tags, blocks)
@@ -273,8 +301,8 @@ def main():
     else:
         with open(CATALOG, "wb") as handle:
             handle.write(data)
-    print("crush=%d compress=%d unpack=%d block_compress=%d squeezing=%d" % (
-        len(catalog["crush"]), len(catalog["compress"]), len(catalog["unpack"]),
+    print("crush=%d compress=%d unpack=%d mesh=%d block_compress=%d squeezing=%d" % (
+        len(catalog["crush"]), len(catalog["compress"]), len(catalog["unpack"]), len(catalog["mesh"]),
         len(compressed), len(squeezed)))
 
 
