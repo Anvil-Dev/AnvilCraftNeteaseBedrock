@@ -27,6 +27,11 @@ class DropDelivery(object):
         if self._store is None:
             self._store = self._factory.CreateExtraData(self._level)
             self.pending = self._store.GetExtraData(self.KEY) or []
+            # 0.2.0 欠发的西瓜片使用旧 ID，随本次补发写回当前存档。
+            for _, _, item in self.pending:
+                if item.get("newItemName") == "minecraft:melon":
+                    item["newItemName"] = "minecraft:melon_slice"
+                    self._dirty = True
 
     def _save(self, records):
         saved = self._store.SetExtraData(self.KEY, records, True)
@@ -185,5 +190,6 @@ class DropWork(object):
         output_pos = (x + 0.5, y + (0.25 if platform == CAULDRON else 0), z + 0.5)
         change.extend((output_pos, item) for item in products(batch))
         self._delivery.send(dim, change)
-        self._log.info("[AnvilCraft] item process dim=%s pos=%s result=%s count=%s",
-                       dim, pos, batch.recipe.output, batch.times * batch.recipe.count)
+        self._log.info("[AnvilCraft] item process dim=%s pos=%s recipe=%s batches=%d results=%s",
+                       dim, pos, batch.recipe.source, batch.times,
+                       [(name, count * batch.times) for name, count in batch.recipe.outputs])

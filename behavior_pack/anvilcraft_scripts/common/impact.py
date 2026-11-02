@@ -2,20 +2,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """将一次下落与一次方块粉碎配对，只在还原为方块时结算。"""
 
-CRUSH_RESULTS = {
-    "minecraft:cobblestone": "minecraft:gravel",
-    "minecraft:gravel": "minecraft:sand",
-    "minecraft:polished_andesite": "minecraft:andesite",
-    "minecraft:polished_diorite": "minecraft:diorite",
-    "minecraft:polished_granite": "minecraft:granite",
-    "minecraft:granite": "minecraft:red_sand",
-    "minecraft:soul_soil": "minecraft:soul_sand",
-    "minecraft:stone_bricks": "minecraft:cracked_stone_bricks",
-    "minecraft:nether_brick": "minecraft:cracked_nether_bricks",
-    "minecraft:polished_blackstone_bricks": "minecraft:cracked_polished_blackstone_bricks",
-    "minecraft:deepslate_bricks": "minecraft:cracked_deepslate_bricks",
-    "minecraft:deepslate_tiles": "minecraft:cracked_deepslate_tiles",
-}
+from anvilcraft_scripts.common.vanilla_catalog import CRUSH_RESULTS
+
 VANILLA_ANVILS = frozenset(("minecraft:anvil", "minecraft:chipped_anvil",
                             "minecraft:damaged_anvil"))
 

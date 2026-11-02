@@ -4,35 +4,20 @@
 
 from collections import Counter, namedtuple
 
+from anvilcraft_scripts.common.vanilla_catalog import COMPRESS, UNPACK
+
 CAULDRON = "minecraft:cauldron"
 TRAPDOOR = "minecraft:iron_trapdoor"
 Drop = namedtuple("Drop", "entity pos item")
-Recipe = namedtuple("Recipe", "inputs output count")
+Recipe = namedtuple("Recipe", "source inputs outputs")
 Batch = namedtuple("Batch", "recipe times debits")
 
 
-def _single(source, result, count):
-    return Recipe((("minecraft:" + source, 1),), "minecraft:" + result, count)
-
-
 RECIPES = {
-    CAULDRON: (Recipe((("minecraft:bone", 3),), "minecraft:bone_block", 1),),
-    TRAPDOOR: (
-        # 蜂蜜瓶配方需要两种原料，按上游优先级先匹配。
-        Recipe((("minecraft:honey_block", 1), ("minecraft:glass_bottle", 4)),
-               "minecraft:honey_bottle", 4),
-        _single("amethyst_block", "amethyst_shard", 4),
-        _single("clay", "clay_ball", 4),
-        _single("glowstone", "glowstone_dust", 4),
-        _single("honeycomb_block", "honeycomb", 4),
-        _single("melon_block", "melon", 9),
-        _single("dripstone_block", "pointed_dripstone", 4),
-        _single("prismarine", "prismarine_shard", 4),
-        _single("prismarine_bricks", "prismarine_shard", 9),
-        _single("quartz_block", "quartz", 4),
-        _single("snow", "snowball", 4),
-    ),
+    CAULDRON: tuple(Recipe(*row) for row in COMPRESS),
+    TRAPDOOR: tuple(Recipe(*row) for row in UNPACK),
 }
+STACK_LIMITS = {"minecraft:minecart": 1, "minecraft:honey_bottle": 16, "minecraft:snowball": 16}
 
 
 def usable_platform(name, states):
@@ -60,33 +45,64 @@ def item_name(item):
     return item.get("newItemName") or item.get("itemName")
 
 
+def _tag_value(tag):
+    return tag.get("__value__", tag) if isinstance(tag, dict) else tag
+
+
+def _empty_cart_data(tag):
+    fields = _tag_value(tag)
+    if not fields:
+        return True
+    if not isinstance(fields, dict):
+        return False
+    for key, value in fields.iteritems():
+        if key in ("display", "RepairCost"):
+            continue
+        if key in ("Items", "ChestItems") and not _tag_value(value):
+            continue
+        if key in ("EntityTag", "BlockEntityTag") and _empty_cart_data(value):
+            continue
+        return False
+    return True
+
+
 def match_drops(platform, drops):
     """一次落砧只选一种配方，最多处理上游默认的 64 份。"""
+    # 只拆能确认未载货的矿车，保留带战利品表或未知库存格式的掉落物。
+    drops = [drop for drop in drops if item_name(drop.item) not in
+             ("minecraft:chest_minecart", "minecraft:hopper_minecart")
+             or _empty_cart_data(drop.item.get("userData"))]
+    if not drops:
+        return None
     totals = Counter()
     for drop in drops:
         totals[item_name(drop.item)] += drop.item["count"]
     for recipe in RECIPES[platform]:
-        times = min([64] + [totals[name] // count for name, count in recipe.inputs])
+        times = min([64] + [sum(totals[name] for name in options) // count
+                            for options, count in recipe.inputs])
         if not times:
             continue
-        needed = dict((name, count * times) for name, count in recipe.inputs)
         debits = []
-        for drop in drops:
-            name = item_name(drop.item)
-            take = min(drop.item["count"], needed.get(name, 0))
-            if take:
+        for options, count in recipe.inputs:
+            remaining = count * times
+            for drop in drops:
+                if item_name(drop.item) not in options:
+                    continue
+                take = min(drop.item["count"], remaining)
                 debits.append((drop, take))
-                needed[name] -= take
+                remaining -= take
+                if not remaining:
+                    break
         return Batch(recipe, times, debits)
     return None
 
 
 def products(batch):
     """按基岩版物品堆叠上限拆分产物。"""
-    name = batch.recipe.output
-    maximum = 16 if name in ("minecraft:snowball", "minecraft:honey_bottle") else 64
-    remaining = batch.times * batch.recipe.count
-    while remaining:
-        count = min(maximum, remaining)
-        yield {"newItemName": name, "newAuxValue": 0, "count": count}
-        remaining -= count
+    for name, quantity in batch.recipe.outputs:
+        maximum = STACK_LIMITS.get(name, 64)
+        remaining = batch.times * quantity
+        while remaining:
+            count = min(maximum, remaining)
+            yield {"newItemName": name, "newAuxValue": 0, "count": count}
+            remaining -= count

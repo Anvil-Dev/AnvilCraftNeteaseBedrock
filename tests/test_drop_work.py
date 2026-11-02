@@ -197,6 +197,74 @@ class WorkTests(unittest.TestCase):
         self.assertEqual([16] * 16, [d.item["count"] for d in self.stacks("snowball")])
         self.assertEqual([1], [d.item["count"] for d in self.stacks("snow")])
 
+    def test_iron_compresses_and_unpacks_one_step_per_fall(self):
+        self.drop("1", "iron_ingot", 8)
+        self.fall()
+        self.assertIn("1", self.world.drops)
+        self.drop("2", "iron_ingot", 11)
+        self.drop("3", "string", 4)
+        self.fall()
+        self.assertEqual([2], [d.item["count"] for d in self.stacks("iron_block")])
+        self.assertEqual([1], [d.item["count"] for d in self.stacks("iron_ingot")])
+        self.assertIn("3", self.world.drops)
+        self.fall()
+        self.assertEqual([1], [d.item["count"] for d in self.stacks("white_wool")])
+        self.platform("iron_trapdoor", {"upside_down_bit": True, "open_bit": False})
+        self.stacks("iron_block")[0].pos = (-0.5, 64, 1.5)
+        self.fall()
+        self.assertItemsEqual([18, 1], [d.item["count"] for d in self.stacks("iron_ingot")])
+        self.assertFalse(self.stacks("iron_nugget"))
+
+    def test_tagged_wood_variants_share_a_recipe(self):
+        self.platform("iron_trapdoor", {"upside_down_bit": True, "open_bit": False})
+        pos = (-0.5, 64, 1.5)
+        self.drop("1", "stripped_oak_wood", 2, pos)
+        self.drop("2", "oak_log", 1, pos)
+        self.drop("3", "spruce_log", 1, pos)
+        self.fall()
+        self.assertEqual([12], [d.item["count"] for d in self.stacks("oak_planks")])
+        self.assertIn("3", self.world.drops)
+
+    def test_minecart_parts_and_failed_second_output(self):
+        self.platform("iron_trapdoor", {"upside_down_bit": True, "open_bit": False})
+        pos = (-0.5, 64, 1.5)
+        contents = {"Items": {"__type__": 9, "__value__": [{"Name": "minecraft:diamond"}]}}
+        self.drop("storage", "chest_minecart", 1, pos, userData={"EntityTag": contents})
+        self.drop("sealed", "hopper_minecart", 1, pos, userData={"custom:storage": contents})
+        self.drop("1", "chest_minecart", 1, pos, userData={"display": {"Name": "named"}})
+        self.drop("2", "chest_minecart", 1, pos)
+        self.drop("3", "hopper_minecart", 1, pos)
+        self.drop("4", "tnt_minecart", 1, pos)
+        self.drop("5", "acacia_log", 1, pos)
+        self.world.refuse.add("minecraft:chest")
+        self.fall()
+        self.assertEqual([1, 1], [d.item["count"] for d in self.stacks("minecart")])
+        self.assertFalse(self.stacks("chest"))
+        self.assertTrue(all(k in self.world.drops for k in ("3", "4", "5", "storage")))
+        self.bind()
+        self.world.refuse.clear()
+        self.fall("43")
+        self.tick_for(60)
+        self.assertEqual([2], [d.item["count"] for d in self.stacks("chest")])
+        self.assertEqual([1], [d.item["count"] for d in self.stacks("hopper")])
+        self.fall("44")
+        self.assertEqual([1], [d.item["count"] for d in self.stacks("tnt")])
+        self.assertEqual([1] * 4, [d.item["count"] for d in self.stacks("minecart")])
+        self.assertEqual(contents, self.world.drops["storage"].item["userData"]["EntityTag"])
+        self.assertEqual(contents, self.world.drops["sealed"].item["userData"]["custom:storage"])
+        self.assertIn("5", self.world.drops)
+
+    def test_legacy_melon_credit_and_new_unpack_use_current_item_id(self):
+        key = "anvilcraft:pending_drops_v1"
+        self.world.save[key] = [[1, list(self.support), {"newItemName": "minecraft:melon",
+                                                          "newAuxValue": 0, "count": 9}]]
+        self.platform("iron_trapdoor", {"upside_down_bit": True, "open_bit": False})
+        self.drop("1", "melon_block", 1, pos=(-0.5, 64, 1.5))
+        self.fall()
+        self.tick_for(60)
+        self.assertEqual([9, 9], [d.item["count"] for d in self.stacks("melon_slice")])
+        self.assertEqual([], self.world.save[key])
+
     def test_one_vanilla_landing_cannot_unpack_a_second_recipe(self):
         self.platform("iron_trapdoor", {"upside_down_bit": True, "open_bit": False})
         self.drop("1", "clay", 1, pos=(-0.5, 64, 1.5))

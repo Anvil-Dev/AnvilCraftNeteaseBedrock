@@ -110,6 +110,20 @@ git diff --check
 
 2026-11-02 的 PC 测试日志确认基岩引擎 `1.21.130.0` 已加载主包两端。旧版服务端每次收到无参数的 `OnScriptTickServer` 都抛出 `TypeError: _advance() takes exactly 2 arguments (1 given)`。修复版客户端启动行包含 `addon=0.1.1`。服务端识别原版下落实体后记录 `falling anvil`，加工成功记录 `crush` 和产物 ID，输入未匹配或替换失败则记录 `no crush` 和脚下方块 ID。
 
-主包 `0.2.0` 同时更新了行为包与资源包，客户端启动行包含 `addon=0.2.0`。启用这一对包后，首次进入该世界的玩家会收到手册。物品加工日志中的 `item process` 记录产物 ID 和数量。[配方与复测方法](recipes.md)
+主包行为包 `0.3.0` 搭配资源包 `0.2.0`，客户端启动行包含 `addon=0.3.0`。首次进入该世界的玩家会收到手册。加工日志中的 `item process` 记录配方 ID、份数和每种产物的总量。旧版欠发记录中的西瓜片随补发迁移到 `minecraft:melon_slice`。[配方与复测方法](recipes.md)
 
 如果引擎拒绝生成产物或返还余料，服务端会把欠发物品保存到世界扩展数据 `anvilcraft:pending_drops_v1`，在目标区块加载后重试。如果补发已生成实体、存档写入和实体撤销又同时失败，`spawned item could not be retracted` 日志会列出实体 ID 和原始记录。此时先恢复存档写入并核对该物品，再重启世界。引擎的存档写入和掉落物生成分属两次调用，硬崩溃窗口需在存档回归时单独验证。
+
+## 复核原版落砧配方
+
+`tools/sync_vanilla_recipes.py` 读取 Minecraft Java 1.21.1 客户端中的默认配方、NeoForge 21.1.238 的配方覆盖与标签、AnvilCraft `ef65f8a` 的默认数据包，以及基岩 1.21.130 的物品表。运行时直接使用生成的 Python 配方表。更新清单时先准备这些输入，在仓库根目录执行以下命令。[基岩 1.21.130.3 物品表](https://raw.githubusercontent.com/Mojang/bedrock-samples/v1.21.130.3/metadata/vanilladata_modules/mojang-items.json)
+
+```powershell
+$cache = Join-Path $env:USERPROFILE '.gradle/caches'
+$mc = Join-Path $cache 'neoformruntime/artifacts/minecraft_1.21.1_client.jar'
+$neo = (Get-Item "$cache/modules-2/files-2.1/net.neoforged/neoforge/21.1.238/*/*-universal.jar").FullName
+$items = '.sdk/bedrock-1.21.130.3/mojang-items.json'
+python -B tools/sync_vanilla_recipes.py --minecraft $mc --neoforge $neo --anvilcraft ../AnvilCraft --bedrock-items $items --check
+```
+
+`--check` 将重新计算的原料、产物和匹配顺序与仓库中的配方表逐项比对。去掉该参数即可重建配方表。基线输出为 `crush=12 compress=33 unpack=54`。
