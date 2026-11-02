@@ -2,12 +2,20 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """匹配上下两格的压合配方，并把压榨液量换算为原版锅的刻度。"""
 
-from anvilcraft_scripts.common.vanilla_catalog import BLOCK_COMPRESS, SQUEEZING
+from anvilcraft_scripts.common.vanilla_catalog import BLOCK_COMPRESS, BLOCK_SMEAR, SQUEEZING
 
 
 def compression(upper, lower):
     for source, top, bottom, result in BLOCK_COMPRESS:
         if upper in top and lower in bottom:
+            return source, result
+    return None
+
+
+def smearing(upper, lower, states):
+    for source, top, properties, bottom, result in BLOCK_SMEAR:
+        if (upper in top and lower in bottom
+                and all(states.get(key) == value for key, value in properties.items())):
             return source, result
     return None
 

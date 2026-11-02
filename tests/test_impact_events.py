@@ -37,6 +37,7 @@ class Engine(object):
         self.cells = {(1, (-1, 63, 1)): "minecraft:cobblestone"}
         self.hit = {"identifier": "minecraft:cobblestone", "pos": (-1, 63, 1)}
         self.writes = []
+        self.liquids = {}
 
     def ListenForEvent(self, namespace, system, name, listener, callback):
         self.callbacks[name] = callback
@@ -74,9 +75,17 @@ class Engine(object):
     def GetBlockNew(self, pos, dimension):
         return {"name": self.cells.get((dimension, pos), "minecraft:air")}
 
-    def SetBlockNew(self, pos, block, mode, dimension, legacy):
+    def SetBlockNew(self, pos, block, mode, dimension, legacy, updateNeighbors=True):
         self.writes.append((dimension, pos, block["name"]))
         self.cells[dimension, pos] = block["name"]
+        return True
+
+    def GetLiquidBlock(self, pos, dimension):
+        value = self.liquids.get((dimension, pos))
+        return dict(value) if value else None
+
+    def SetLiquidBlock(self, pos, block, dimension):
+        self.liquids[dimension, pos] = dict(block)
         return True
 
 

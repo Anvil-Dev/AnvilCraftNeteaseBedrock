@@ -247,7 +247,31 @@ def compile_blocks(recipes, tags, registry):
     return compressed, squeezed
 
 
-def render(catalog, compressed, squeezed):
+def compile_smearing(recipes, tags, registry):
+    smearing = []
+    for source, recipe in sorted(recipes.items()):
+        if recipe.get("type") != "anvilcraft:block_smear":
+            continue
+        groups = [sorted(vanilla_items(slot["blocks"], tags)) for slot in recipe["inputs"]]
+        result = recipe["result"]
+        if not result["block"].startswith(MC) or not all(groups):
+            continue
+        if len(groups) != 2 or set(result) != {"block"}:
+            raise ValueError("unsupported smearing result: %s" % source)
+        first, second = recipe["inputs"]
+        condition = {}
+        if first.get("properties"):
+            if first["properties"] != [{"face": "ceiling"}] or groups[0] != [MC + "grindstone"]:
+                raise ValueError("unsupported smearing state: %s" % source)
+            condition["attachment"] = "hanging"
+        if set(first) - {"blocks", "properties"} or set(second) != {"blocks"}:
+            raise ValueError("unsupported smearing predicate: %s" % source)
+        inputs = [[bedrock_id(name, registry) for name in group] for group in groups]
+        smearing.append((source, inputs[0], condition, inputs[1], bedrock_id(result["block"], registry)))
+    return smearing
+
+
+def render(catalog, compressed, squeezed, smearing):
     lines = ["# -*- coding: utf-8 -*-", "# SPDX-License-Identifier: LGPL-3.0-or-later",
              u'"""由 tools/sync_vanilla_recipes.py 生成。"""', "", "CRUSH_RESULTS = {"]
     for _, groups, results in catalog["crush"]:
@@ -271,6 +295,10 @@ def render(catalog, compressed, squeezed):
         lines.extend(['    "%s": ("%s",' % (block, source),
                       '        "%s", "%s", %d),' % (result, fluid, amount)])
     lines.append("}")
+    lines.extend(["", "BLOCK_SMEAR = ("])
+    for row in smearing:
+        lines.append("    %s," % json.dumps(row, sort_keys=True))
+    lines.append(")")
     return (u"\n".join(lines) + u"\n").encode("utf-8")
 
 
@@ -293,7 +321,8 @@ def main():
     with open(args.bedrock_blocks, "rb") as handle:
         blocks = {row["name"] for row in json.load(handle)["data_items"]}
     compressed, squeezed = compile_blocks(recipes, block_tags, blocks)
-    data = render(catalog, compressed, squeezed)
+    smearing = compile_smearing(recipes, block_tags, blocks)
+    data = render(catalog, compressed, squeezed, smearing)
     if args.check:
         with open(CATALOG, "rb") as handle:
             if handle.read().replace("\r\n", "\n") != data:
@@ -301,9 +330,9 @@ def main():
     else:
         with open(CATALOG, "wb") as handle:
             handle.write(data)
-    print("crush=%d compress=%d unpack=%d mesh=%d block_compress=%d squeezing=%d" % (
+    print("crush=%d compress=%d unpack=%d mesh=%d block_compress=%d squeezing=%d block_smear=%d" % (
         len(catalog["crush"]), len(catalog["compress"]), len(catalog["unpack"]), len(catalog["mesh"]),
-        len(compressed), len(squeezed)))
+        len(compressed), len(squeezed), len(smearing)))
 
 
 if __name__ == "__main__":

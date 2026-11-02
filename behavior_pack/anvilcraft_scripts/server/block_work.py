@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """在同一次落砧中修改两格方块，写入失败时恢复原状态。"""
 
-from anvilcraft_scripts.common.block_recipes import compression, squeezed_states
+from anvilcraft_scripts.common.block_recipes import compression, smearing, squeezed_states
 from anvilcraft_scripts.common.impact import VANILLA_ANVILS
-from anvilcraft_scripts.common.vanilla_catalog import BLOCK_COMPRESS, SQUEEZING
+from anvilcraft_scripts.common.vanilla_catalog import BLOCK_COMPRESS, BLOCK_SMEAR, SQUEEZING
 
-_UPPER_BLOCKS = frozenset(name for _, names, _, _ in BLOCK_COMPRESS for name in names) | set(SQUEEZING)
+_SMEAR_BLOCKS = frozenset(name for _, names, _, _, _ in BLOCK_SMEAR for name in names)
+_UPPER_BLOCKS = frozenset(name for _, names, _, _ in BLOCK_COMPRESS for name in names) | set(SQUEEZING) | _SMEAR_BLOCKS
 
 
 class BlockWork(object):
@@ -39,7 +40,7 @@ class BlockWork(object):
         if self._store is not None:
             self._save()
 
-    def _read(self, dim, pos):
+    def _read(self, dim, pos, liquid=False):
         if not self._factory.CreateChunkSource(self._level).CheckChunkState(dim, tuple(pos)):
             return None
         block = self._blocks.GetBlockNew(tuple(pos), dim)
@@ -49,17 +50,56 @@ class BlockWork(object):
         result = {"name": block["name"], "states": dict(states)}
         if block["name"] == "minecraft:cauldron":
             result["nbt"] = self._blocks.GetBlockEntityData(dim, tuple(pos))
+        if liquid:
+            extra = self._blocks.GetLiquidBlock(tuple(pos), dim)
+            result["liquid"] = extra if extra and extra.get("name") != "minecraft:air" else None
         return result
 
-    def _row(self, dim, pos, name):
-        before = self._read(dim, pos)
+    def _current(self, dim, row):
+        return self._read(dim, row["pos"], "liquid" in row["before"])
+
+    def _row(self, dim, pos, name, preserve=False):
+        before = self._read(dim, pos, preserve)
         if before is None:
             return None
         states = self._states.GetBlockStatesFromAuxValue(name, 0)
         if states is None:
             return None
-        return {"pos": list(pos), "mode": "block", "before": before,
-                "after": {"name": name, "states": dict(states)}}
+        after = {"name": name, "states": dict(states)}
+        if preserve:
+            after["states"].update((key, value) for key, value in before["states"].items()
+                                  if key in after["states"])
+            after["liquid"] = before["liquid"]
+        return {"pos": list(pos), "mode": "block", "before": before, "after": after}
+
+    def _smear_plan(self, dim, pos, lower_pos, upper):
+        self._states = self._factory.CreateBlockState(self._level)
+        catalyst = self._read(dim, pos, True)
+        target = self._read(dim, lower_pos, True)
+        if catalyst is None or target is None:
+            return None
+        matched = smearing(upper, target["name"], catalyst["states"])
+        if matched is None:
+            return None
+        source, result = matched
+        change = self._row(dim, lower_pos, result, True)
+        if change is None:
+            return source, []
+        changes = [change]
+        if "upper_block_bit" in target["states"]:
+            other_pos = (lower_pos[0], lower_pos[1] + (-1 if target["states"]["upper_block_bit"] else 1), lower_pos[2])
+            other = self._read(dim, other_pos, True)
+            if (other is None or other["name"] != target["name"]
+                    or other["states"].get("upper_block_bit") == target["states"]["upper_block_bit"]):
+                return source, []
+            other_change = self._row(dim, other_pos, result, True)
+            if other_change is None:
+                return source, []
+            changes.insert(0, other_change)
+            for row in changes:
+                row["notify"] = False
+        changes.append({"pos": list(pos), "mode": "check", "before": catalyst, "after": catalyst})
+        return source, changes
 
     def _plan(self, dim, pos, upper):
         lower_pos = (pos[0], pos[1] - 1, pos[2])
@@ -70,6 +110,10 @@ class BlockWork(object):
             source, result = matched
             return source, [self._row(dim, lower_pos, result),
                             self._row(dim, pos, "minecraft:air")]
+        if upper in _SMEAR_BLOCKS:
+            plan = self._smear_plan(dim, pos, lower_pos, upper)
+            if plan is not None:
+                return plan
         if upper not in SQUEEZING or lower.get("name") != "minecraft:cauldron":
             return None
         self._states = self._factory.CreateBlockState(self._level)
@@ -105,12 +149,17 @@ class BlockWork(object):
             aux = self._states.GetBlockAuxValueFromStates(value["name"], value["states"])
             if aux is None or aux < 0:
                 return False
-            self._blocks.SetBlockNew(pos, {"name": value["name"], "aux": aux}, 0, dim, True)
-        return self._read(dim, pos) == value
+            self._blocks.SetBlockNew(pos, {"name": value["name"], "aux": aux}, 0, dim, True,
+                                     row.get("notify", True))
+            if value.get("liquid") is not None:
+                current = self._blocks.GetLiquidBlock(pos, dim)
+                if not current or current.get("name") == "minecraft:air":
+                    self._blocks.SetLiquidBlock(pos, value["liquid"], dim)
+        return self._current(dim, row) == value
 
     def _complete(self, record):
         for row in record["changes"]:
-            current = self._read(record["dimension"], row["pos"])
+            current = self._current(record["dimension"], row)
             if current == row["after"]:
                 continue
             # 压合移除上格后，铁砧可继续下落并占据这个空气格。
@@ -123,10 +172,11 @@ class BlockWork(object):
     def _rollback(self, record):
         dim = record["dimension"]
         written = record["written"]
-        changes = record["changes"] if written is None else [record["changes"][i] for i in written]
+        changes = ([row for row in record["changes"] if row["mode"] != "check"] if written is None
+                   else [record["changes"][i] for i in written])
         restored = True
         for row in reversed(changes):
-            current = self._read(dim, row["pos"])
+            current = self._current(dim, row)
             if current is None:
                 restored = False
                 continue
@@ -135,7 +185,10 @@ class BlockWork(object):
                 # 只撤回本次写入的方块状态，保留其他回调对锅 NBT 的修改。
                 before = dict(current, name=before["name"], states=before["states"])
                 after = dict(current, name=after["name"], states=after["states"])
-            if current not in (before, after):
+            comparable = current
+            if "liquid" in before and current.get("liquid") is None:
+                comparable = dict(current, liquid=before["liquid"])
+            if comparable not in (before, after):
                 self._log.error("[AnvilCraft] block recovery conflict dim=%s change=%r current=%r",
                                 dim, row, current)
                 restored = False
@@ -171,6 +224,10 @@ class BlockWork(object):
             self._log.info("[AnvilCraft] block process skipped dim=%s pos=%s recipe=%s", dim, pos, source)
             return True
         self.load()
+        occupied.update((dim, tuple(row["pos"])) for row in changes)
+        if occupied & self._busy or any((record["dimension"], tuple(row["pos"])) in occupied
+                                       for record in self._pending for row in record["changes"]):
+            return True
         self._busy.update(occupied)
         try:
             record = {"dimension": dim, "changes": changes, "done": False, "written": None}
@@ -180,8 +237,8 @@ class BlockWork(object):
                 return True
             record["written"] = []
             for index, row in enumerate(changes):
-                available = self._read(dim, row["pos"]) == row["before"]
-                if available:
+                available = self._current(dim, row) == row["before"]
+                if available and row["mode"] != "check":
                     record["written"].append(index)
                     available = self._write(dim, row, row["after"])
                 if not available:

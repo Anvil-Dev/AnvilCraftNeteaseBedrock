@@ -9,7 +9,7 @@ import unittest
 from test_drop_work import Workshop
 from test_impact_events import ImpactEvents
 from anvilcraft_scripts.common.impact import CRUSH_RESULTS
-from anvilcraft_scripts.common.vanilla_catalog import BLOCK_COMPRESS, SQUEEZING
+from anvilcraft_scripts.common.vanilla_catalog import BLOCK_COMPRESS, BLOCK_SMEAR, SQUEEZING
 
 LOG = logging.getLogger("block-work-test")
 LOG.addHandler(logging.NullHandler())
@@ -27,6 +27,9 @@ class BlockWorkshop(Workshop):
         self.unloaded = set()
         self.block_changed = None
         self.state_changed = None
+        self.defaults = {}
+        self.clear_liquid_on_set = False
+        self.liquid_results = []
 
     def CreateBlock(self, level):
         return self
@@ -53,21 +56,30 @@ class BlockWorkshop(Workshop):
         return self.state_aux[value]
 
     def GetBlockStatesFromAuxValue(self, name, aux):
+        if aux == 0:
+            return dict(self.defaults.get(name, {}))
         for (kind, states), value in self.state_aux.items():
             if name == kind and value == aux:
                 return dict(states)
         return {}
 
-    def SetBlockNew(self, pos, block, mode, dim, legacy):
+    def SetBlockNew(self, pos, block, mode, dim, legacy, updateNeighbors=True):
         if self.block_results and not self.block_results.pop(0):
             return False
         self.block_states[dim, pos] = self.GetBlockStatesFromAuxValue(block["name"], block["aux"])
-        changed = super(BlockWorkshop, self).SetBlockNew(pos, block, mode, dim, legacy)
+        changed = super(BlockWorkshop, self).SetBlockNew(pos, block, mode, dim, legacy, updateNeighbors)
+        if self.clear_liquid_on_set:
+            self.liquids.pop((dim, pos), None)
         if self.block_changed:
             callback = self.block_changed
             self.block_changed = None
             callback()
         return changed
+
+    def SetLiquidBlock(self, pos, block, dimension):
+        if self.liquid_results and not self.liquid_results.pop(0):
+            return False
+        return super(BlockWorkshop, self).SetLiquidBlock(pos, block, dimension)
 
     def SetBlockStates(self, pos, states, dim):
         if self.state_results and not self.state_results.pop(0):
@@ -133,6 +145,73 @@ class BlockWorkTests(unittest.TestCase):
         self.fall()
         self.assertEqual("minecraft:air", self.world.cells[1, self.upper])
         self.assertEqual("minecraft:deepslate", self.world.cells[1, self.lower])
+
+    def test_every_smearing_recipe_preserves_the_upper_block(self):
+        for _, uppers, properties, lowers, result in BLOCK_SMEAR:
+            upper = uppers[0]
+            self.put(self.upper, upper.split(":")[1], **properties)
+            self.put(self.lower, lowers[0].split(":")[1])
+            if result.endswith("_door"):
+                self.world.defaults[result] = {"upper_block_bit": False}
+                self.world.block_states[1, self.lower] = {"upper_block_bit": True}
+                self.put((-1, 61, 1), lowers[0].split(":")[1], upper_block_bit=False)
+            before = copy.deepcopy(self.world.block_states[1, self.upper])
+            self.fall()
+            self.assertEqual(upper, self.world.cells[1, self.upper])
+            self.assertEqual(before, self.world.block_states[1, self.upper])
+            self.assertEqual(result, self.world.cells[1, self.lower], lowers[0])
+
+    def test_grindstone_attachment_and_copper_states(self):
+        self.put(self.upper, "grindstone", attachment="standing")
+        self.put(self.lower, "oxidized_cut_copper_stairs", upside_down_bit=True, weirdo_direction=3)
+        self.fall()
+        self.assertFalse(self.world.writes)
+        self.world.defaults["minecraft:weathered_cut_copper_stairs"] = {
+            "upside_down_bit": False, "weirdo_direction": 0}
+        self.put(self.upper, "grindstone", attachment="hanging")
+        self.fall()
+        self.assertEqual("minecraft:weathered_cut_copper_stairs", self.world.cells[1, self.lower])
+        self.assertEqual({"upside_down_bit": True, "weirdo_direction": 3},
+                         self.world.block_states[1, self.lower])
+        self.assertEqual("minecraft:grindstone", self.world.cells[1, self.upper])
+
+    def test_copper_door_converts_both_halves_and_preserves_their_states(self):
+        self.put(self.upper, "honeycomb_block")
+        self.put(self.lower, "copper_door", upper_block_bit=True, open_bit=True,
+                 door_hinge_bit=True, **{"minecraft:cardinal_direction": "east"})
+        other = (-1, 61, 1)
+        self.put(other, "copper_door", upper_block_bit=False, open_bit=True,
+                 door_hinge_bit=True, **{"minecraft:cardinal_direction": "east"})
+        self.world.defaults["minecraft:waxed_copper_door"] = {
+            "upper_block_bit": False, "open_bit": False, "door_hinge_bit": False,
+            "minecraft:cardinal_direction": "north"}
+        before = copy.deepcopy(self.world.block_states)
+        self.fall()
+        for pos in (self.lower, other):
+            self.assertEqual("minecraft:waxed_copper_door", self.world.cells[1, pos])
+            self.assertEqual(before[1, pos], self.world.block_states[1, pos])
+
+    def test_smearing_revalidates_its_catalyst_and_restores_waterlogged_input(self):
+        self.put(self.upper, "moss_block")
+        self.put(self.lower, "stone_bricks")
+        self.world.block_changed = lambda: self.put(self.upper, "stone")
+        self.fall()
+        self.assertEqual("minecraft:stone_bricks", self.world.cells[1, self.lower])
+        self.assertEqual("minecraft:stone", self.world.cells[1, self.upper])
+        self.put(self.upper, "honeycomb_block")
+        self.put(self.lower, "cut_copper_slab", **{"minecraft:vertical_half": "top"})
+        self.world.defaults["minecraft:waxed_cut_copper_slab"] = {"minecraft:vertical_half": "bottom"}
+        water = {"name": "minecraft:water", "aux": 0}
+        self.world.liquids[1, self.lower] = water
+        self.world.clear_liquid_on_set = True
+        self.world.liquid_results = [False, True]
+        self.fall()
+        self.assertEqual("minecraft:cut_copper_slab", self.world.cells[1, self.lower])
+        self.assertEqual(water, self.world.liquids[1, self.lower])
+        self.fall()
+        self.assertEqual("minecraft:waxed_cut_copper_slab", self.world.cells[1, self.lower])
+        self.assertEqual({"minecraft:vertical_half": "top"}, self.world.block_states[1, self.lower])
+        self.assertEqual(water, self.world.liquids[1, self.lower])
 
     def test_order_wrong_base_and_unloaded_base_preserve_materials(self):
         self.put(self.upper, "dirt")
