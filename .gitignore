@@ -1,0 +1,29 @@
+# Python
+*.py[cod]
+*$py.class
+__pycache__/
+.venv/
+venv/
+env/
+.tox/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# 构建输出与游戏测试数据
+/build/
+/dist/
+/run/
+/worlds/
+*.mcaddon
+*.mcpack
+*.log
+
+# 编辑器与操作系统
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+Desktop.ini

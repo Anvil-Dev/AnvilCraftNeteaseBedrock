@@ -1,0 +1,8 @@
+* text=auto eol=lf
+LICENSE -text -whitespace
+ASSETS_LICENSE -text -whitespace
+*.png binary
+*.jpg binary
+*.ogg binary
+*.wav binary
+*.mcstructure binary
