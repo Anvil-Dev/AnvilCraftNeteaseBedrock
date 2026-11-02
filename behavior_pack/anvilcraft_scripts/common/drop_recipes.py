@@ -6,6 +6,7 @@ from collections import Counter, namedtuple
 from random import random
 
 from anvilcraft_scripts.common.vanilla_catalog import COMPRESS, ITEM_CRUSH, MESH, STAMPING, UNPACK
+from anvilcraft_scripts.common.logistics import COLLECTION_AREA
 
 CAULDRON = "minecraft:cauldron"
 TRAPDOOR = "minecraft:iron_trapdoor"
@@ -46,7 +47,9 @@ def usable_platform(name, states):
 def in_recipe_area(platform, pos, feet):
     """以铁砧底面中心为原点，和上游一样用掉落物的小包围盒判断相交。"""
     x, y, z = pos
-    if platform == CAULDRON:
+    if platform == COLLECTION_AREA:
+        center_y, half_width, half_height = y + 0.5, 0.5, 0.5
+    elif platform == CAULDRON:
         center_y, half_width, half_height = y + 0.625, 0.375, 0.375
     elif platform == SCAFFOLDING or platform in TABLES:
         center_y, half_width, half_height = y + 1, 0.5, 0.5

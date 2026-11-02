@@ -1,0 +1,28 @@
+{
+    "minecraft:recipe_shaped": {
+        "result": {
+            "count": 4,
+            "item": "anvilcraft:magnetic_chute"
+        },
+        "pattern": [
+            " A ",
+            "ABA",
+            "A A"
+        ],
+        "description": {
+            "identifier": "anvilcraft:magnetic_chute"
+        },
+        "key": {
+            "A": {
+                "item": "anvilcraft:magnet_ingot"
+            },
+            "B": {
+                "item": "minecraft:dropper"
+            }
+        },
+        "tags": [
+            "crafting_table"
+        ]
+    },
+    "format_version": "1.12.0"
+}

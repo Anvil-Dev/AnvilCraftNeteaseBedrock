@@ -1,0 +1,52 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "category": "construction",
+            "identifier": "anvilcraft:held_damaged_anvil",
+            "register_to_create_menu": false
+        },
+        "components": {
+            "netease:block_entity": {
+                "tick": false,
+                "movable": false
+            },
+            "minecraft:block_light_absorption": 0,
+            "netease:listen_block_remove": {
+                "value": true
+            },
+            "minecraft:loot": "loot_tables/blocks/held_damaged_anvil.json",
+            "netease:face_directional": {
+                "type": "direction"
+            },
+            "minecraft:explosion_resistance": 6.0,
+            "minecraft:destroy_time": 5.0,
+            "netease:aabb": {
+                "collision": {
+                    "max": [
+                        0.875,
+                        1,
+                        1
+                    ],
+                    "min": [
+                        0.125,
+                        0,
+                        0
+                    ]
+                },
+                "clip": {
+                    "max": [
+                        0.875,
+                        1,
+                        1
+                    ],
+                    "min": [
+                        0.125,
+                        0,
+                        0
+                    ]
+                }
+            }
+        }
+    }
+}

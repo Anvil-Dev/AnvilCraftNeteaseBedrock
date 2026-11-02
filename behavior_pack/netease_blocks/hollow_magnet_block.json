@@ -1,0 +1,127 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "category": "construction",
+            "identifier": "anvilcraft:hollow_magnet_block"
+        },
+        "components": {
+            "netease:block_entity": {
+                "tick": true,
+                "movable": false
+            },
+            "netease:aabb": {
+                "collision": [
+                    {
+                        "max": [
+                            0.3125,
+                            1,
+                            1
+                        ],
+                        "min": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "max": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "min": [
+                            0.6875,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "max": [
+                            0.6875,
+                            1,
+                            0.3125
+                        ],
+                        "min": [
+                            0.3125,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "max": [
+                            0.6875,
+                            1,
+                            1
+                        ],
+                        "min": [
+                            0.3125,
+                            0,
+                            0.6875
+                        ]
+                    }
+                ],
+                "clip": [
+                    {
+                        "max": [
+                            0.3125,
+                            1,
+                            1
+                        ],
+                        "min": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "max": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "min": [
+                            0.6875,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "max": [
+                            0.6875,
+                            1,
+                            0.3125
+                        ],
+                        "min": [
+                            0.3125,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "max": [
+                            0.6875,
+                            1,
+                            1
+                        ],
+                        "min": [
+                            0.3125,
+                            0,
+                            0.6875
+                        ]
+                    }
+                ]
+            },
+            "minecraft:block_light_absorption": 0,
+            "netease:listen_block_remove": {
+                "value": true
+            },
+            "minecraft:loot": "loot_tables/blocks/hollow_magnet_block.json",
+            "minecraft:explosion_resistance": 6.0,
+            "minecraft:destroy_time": 2.0,
+            "netease:redstone": {
+                "type": "consumer"
+            }
+        }
+    }
+}

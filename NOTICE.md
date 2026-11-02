@@ -27,4 +27,6 @@
 
 四种专用加工台按同一提交的 `ProcessingTableBlock.java`、`ProcessingTableBlockEntity.java`、`UseItemOnBlock.java` 与 `recipe/stamping_platform.json` 重写，接入 `recipe/item_crush/` 的 89 条原版配方及 `recipe/stamping/` 的 5 条原版配方。加工台模型、碰撞盒、手册与中文名称由本项目编写，模型直接引用游戏内置铁块、石头、脚手架和铁活板门纹理图集，未复制上游美术文件。
 
+磁铁、空心磁铁、雷击磁化与溜槽物流依据同一提交的 `MagnetBlock.java`、`HollowMagnetBlock.java`、`LightningEventListener.java`、`BaseChuteBlockEntity.java`、`ChuteBlockEntity.java` 和 `MagneticChuteBlockEntity.java` 重写。8 条相关合成配方取自上游默认 `recipe/` 目录。悬持方块、原版容器交换凭据、库存恢复与中文手册由本项目编写。新增模型由本项目制作，铁砧、铁块、红石块、漏斗与投掷器纹理通过游戏内置图集引用，未复制上游图片与模型。[上游机制源码](https://github.com/Anvil-Dev/AnvilCraft/tree/ef65f8a876c4d4d695a2f263f3f62d9280e10dad/src/main/java/dev/dubhe/anvilcraft/block) · [Mojang 目标版本纹理图集](https://github.com/Mojang/bedrock-samples/blob/v1.21.130.3/resource_pack/textures/terrain_texture.json)
+
 开发依赖 `mc-netease-sdk` 是网易发布的接口补全包，其版权与许可归属该依赖自身；游戏发布包通过网易运行环境调用 ModSDK。

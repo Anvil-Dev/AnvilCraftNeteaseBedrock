@@ -1,0 +1,28 @@
+{
+    "minecraft:recipe_shaped": {
+        "result": {
+            "count": 4,
+            "item": "anvilcraft:chute"
+        },
+        "pattern": [
+            "A A",
+            "ABA",
+            " A "
+        ],
+        "description": {
+            "identifier": "anvilcraft:chute"
+        },
+        "key": {
+            "A": {
+                "item": "minecraft:iron_ingot"
+            },
+            "B": {
+                "item": "minecraft:dropper"
+            }
+        },
+        "tags": [
+            "crafting_table"
+        ]
+    },
+    "format_version": "1.12.0"
+}

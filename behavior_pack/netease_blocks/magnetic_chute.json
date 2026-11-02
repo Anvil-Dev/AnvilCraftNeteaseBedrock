@@ -1,0 +1,27 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "category": "construction",
+            "identifier": "anvilcraft:magnetic_chute"
+        },
+        "components": {
+            "netease:block_entity": {
+                "tick": true,
+                "movable": false
+            },
+            "netease:listen_block_remove": {
+                "value": true
+            },
+            "minecraft:loot": "loot_tables/blocks/magnetic_chute.json",
+            "netease:face_directional": {
+                "type": "facing_direction"
+            },
+            "minecraft:explosion_resistance": 6.0,
+            "minecraft:destroy_time": 2.0,
+            "netease:redstone": {
+                "type": "consumer"
+            }
+        }
+    }
+}

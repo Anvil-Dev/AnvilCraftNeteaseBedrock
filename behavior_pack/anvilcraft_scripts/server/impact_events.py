@@ -7,6 +7,8 @@ from anvilcraft_scripts.common.drop_recipes import RECIPES, TABLES
 from anvilcraft_scripts.server.drop_work import DropWork
 from anvilcraft_scripts.server.block_work import BlockWork
 from anvilcraft_scripts.server.stations import Stations
+from anvilcraft_scripts.server.magnet_work import MagnetWork
+from anvilcraft_scripts.server.logistics_work import LogisticsWork
 
 
 def _nbt_value(tag):
@@ -64,6 +66,8 @@ class ImpactEvents(object):
     def listen(self, system):
         self._drop_work = DropWork(self._api, system, self._log)
         self._stations = Stations(self._api, system, self._log, self._drop_work)
+        self._magnets = MagnetWork(self._api, self._log, self._stations, self._can_lift)
+        self._logistics = LogisticsWork(self._api, self._log, self._stations, self._drop_work)
         for event, callback in (
             ("LoadServerAddonScriptsAfter", self._load_tags),
             ("HeavyBlockStartFallingServerEvent", self._start),
@@ -74,12 +78,30 @@ class ImpactEvents(object):
             ("EntityRemoveEvent", self._remove_entity),
             ("ChunkAcquireDiscardedServerEvent", self._unload),
             ("OnScriptTickServer", self._advance),
-            ("ServerBlockUseEvent", self._stations.use),
-            ("ServerBlockEntityTickEvent", self._stations.block_tick),
-            ("BlockRemoveServerEvent", self._stations.remove),
+            ("ServerBlockUseEvent", self._machine_use),
+            ("ServerBlockEntityTickEvent", self._machine_tick),
+            ("BlockRemoveServerEvent", self._machine_remove),
         ):
             system.ListenForEvent(self._api.GetEngineNamespace(), self._api.GetEngineSystemName(),
                                   event, self, callback)
+
+    def _machine_use(self, args):
+        self._stations.use(args)
+        self._logistics.use(args)
+
+    def _machine_tick(self, args):
+        self._stations.block_tick(args)
+        self._magnets.block_tick(args)
+        self._logistics.block_tick(args)
+
+    def _machine_remove(self, args):
+        self._stations.remove(args)
+        self._magnets.remove(args)
+        self._logistics.remove(args)
+
+    def _can_lift(self, dim, pos):
+        return not any(fall.dimension == dim and fall.landing == pos
+                       for fall in self._vanilla.itervalues())
 
     def _load_tags(self, args):
         self._drop_work.load()
@@ -152,6 +174,7 @@ class ImpactEvents(object):
             del self._vanilla[entity]
 
     def _add_entity(self, args):
+        self._magnets.lightning(args)
         if args["engineTypeStr"] != "minecraft:falling_block":
             return
         entity = str(args["id"])
@@ -214,6 +237,8 @@ class ImpactEvents(object):
     def _advance(self):
         self._tick += 1
         self._stations.advance(self._tick)
+        self._magnets.advance(self._tick)
+        self._logistics.advance(self._tick)
         self._drop_work.tick(self._tick)
         self._block_work.tick(self._tick)
         for entity, fall in self._vanilla.items():

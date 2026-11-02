@@ -1,0 +1,25 @@
+{
+    "minecraft:recipe_shaped": {
+        "result": {
+            "count": 9,
+            "item": "anvilcraft:hollow_magnet_block"
+        },
+        "pattern": [
+            "AAA",
+            "A A",
+            "AAA"
+        ],
+        "description": {
+            "identifier": "anvilcraft:hollow_magnet_block_from_magnet_block"
+        },
+        "key": {
+            "A": {
+                "item": "anvilcraft:magnet_block"
+            }
+        },
+        "tags": [
+            "crafting_table"
+        ]
+    },
+    "format_version": "1.12.0"
+}

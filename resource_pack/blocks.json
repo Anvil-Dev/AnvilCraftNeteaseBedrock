@@ -1,18 +1,13 @@
 {
-    "anvilcraft:stamping_platform": {
-        "textures": "iron_block",
+    "anvilcraft:hollow_magnet_block": {
         "sound": "metal",
-        "netease_model": "anvilcraft:stamping_platform"
+        "textures": "iron_block",
+        "netease_model": "anvilcraft:hollow_magnet_block"
     },
-    "anvilcraft:unpacking_table": {
-        "textures": "iron_block",
-        "sound": "metal",
-        "netease_model": "anvilcraft:unpacking_table"
-    },
-    "anvilcraft:sifting_table": {
-        "textures": "iron_block",
-        "sound": "metal",
-        "netease_model": "anvilcraft:sifting_table"
+    "anvilcraft:held_anvil": {
+        "sound": "anvil",
+        "textures": "anvil_base",
+        "netease_model": "anvilcraft:held_anvil"
     },
     "format_version": [
         1,
@@ -23,5 +18,57 @@
         "textures": "iron_block",
         "sound": "metal",
         "netease_model": "anvilcraft:crushing_table"
+    },
+    "anvilcraft:magnetic_chute": {
+        "sound": "metal",
+        "textures": {
+            "north": "dropper_front_horizontal",
+            "west": "iron_block",
+            "up": "hopper_top",
+            "down": "hopper_outside",
+            "east": "iron_block",
+            "south": "iron_block"
+        }
+    },
+    "anvilcraft:magnet_block": {
+        "sound": "metal",
+        "textures": "iron_block",
+        "netease_model": "anvilcraft:magnet_block"
+    },
+    "anvilcraft:held_damaged_anvil": {
+        "sound": "anvil",
+        "textures": "anvil_base",
+        "netease_model": "anvilcraft:held_damaged_anvil"
+    },
+    "anvilcraft:stamping_platform": {
+        "textures": "iron_block",
+        "sound": "metal",
+        "netease_model": "anvilcraft:stamping_platform"
+    },
+    "anvilcraft:chute": {
+        "sound": "metal",
+        "textures": {
+            "north": "dropper_front_horizontal",
+            "west": "iron_block",
+            "up": "hopper_top",
+            "down": "hopper_outside",
+            "east": "iron_block",
+            "south": "iron_block"
+        }
+    },
+    "anvilcraft:unpacking_table": {
+        "textures": "iron_block",
+        "sound": "metal",
+        "netease_model": "anvilcraft:unpacking_table"
+    },
+    "anvilcraft:held_chipped_anvil": {
+        "sound": "anvil",
+        "textures": "anvil_base",
+        "netease_model": "anvilcraft:held_chipped_anvil"
+    },
+    "anvilcraft:sifting_table": {
+        "textures": "iron_block",
+        "sound": "metal",
+        "netease_model": "anvilcraft:sifting_table"
     }
 }

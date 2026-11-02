@@ -44,33 +44,37 @@ class Inventories(object):
 
     KEY = "anvilcraft:machine_inventories_v1"
 
-    def __init__(self, factory, level, log):
+    def __init__(self, factory, level, log, key=None):
         self._factory, self._level, self._log = factory, level, log
+        self._key = key or self.KEY
         self._store = None
         self._records = {}
-        self._cursor = 0
+        self._cursors = {}
+        self._saving = False
 
     def load(self):
         if self._store is None:
             self._store = self._factory.CreateExtraData(self._level)
-            self._records = self._store.GetExtraData(self.KEY) or {}
+            self._records = self._store.GetExtraData(self._key) or {}
 
     def get(self, dim, pos):
         self.load()
         return deepcopy(self._records.get(cell_key(dim, pos), {"items": []}))
 
-    def scan(self, limit):
+    def scan(self, limit, channel="all"):
         self.load()
         keys = sorted(self._records)
         if not keys:
             return []
         result = []
+        cursor = self._cursors.get(channel, 0)
         for _ in range(min(limit, len(keys))):
-            self._cursor %= len(keys)
-            key = keys[self._cursor]
-            self._cursor += 1
+            cursor %= len(keys)
+            key = keys[cursor]
+            cursor += 1
             values = [int(part) for part in key.split(":")]
             result.append((values[0], tuple(values[1:]), deepcopy(self._records[key])))
+        self._cursors[channel] = cursor
         return result
 
     def write(self, dim, pos, record):
@@ -78,6 +82,9 @@ class Inventories(object):
 
     def change(self, updates):
         self.load()
+        if self._saving:
+            self._log.warning("[AnvilCraft] deferred reentrant inventory save key=%s", self._key)
+            return False
         records = deepcopy(self._records)
         for dim, pos, record in updates:
             key = cell_key(dim, pos)
@@ -85,8 +92,12 @@ class Inventories(object):
                 records.pop(key, None)
             else:
                 records[key] = deepcopy(record)
-        if not self._store.SetExtraData(self.KEY, records, True):
-            self._log.error("[AnvilCraft] could not save machine inventories")
-            return False
-        self._records = records
-        return True
+        self._saving = True
+        try:
+            if not self._store.SetExtraData(self._key, records, True):
+                self._log.error("[AnvilCraft] could not save machine inventories key=%s", self._key)
+                return False
+            self._records = records
+            return True
+        finally:
+            self._saving = False

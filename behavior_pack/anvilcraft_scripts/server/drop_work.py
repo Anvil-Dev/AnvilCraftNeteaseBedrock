@@ -29,7 +29,8 @@ class DropDelivery(object):
             self._store = self._factory.CreateExtraData(self._level)
             self.pending = self._store.GetExtraData(self.KEY) or []
             # 旧 ID 的西瓜片需要先迁移，再补发并写回存档。
-            for _, _, item in self.pending:
+            for row in self.pending:
+                item = row[2]
                 if item.get("newItemName") == "minecraft:melon":
                     item["newItemName"] = "minecraft:melon_slice"
                     self._dirty = True
@@ -41,13 +42,23 @@ class DropDelivery(object):
         return saved
 
     def _spawn(self, row):
-        dim, pos, item = row
+        dim, pos, item = row[:3]
         entity = self._system.CreateEngineItemEntity(item, dim, tuple(pos))
-        return None if entity in (None, False, "", "-1", -1) else entity
+        if entity in (None, False, "", "-1", -1):
+            return None
+        if len(row) == 4 and not self._factory.CreateActorMotion(entity).SetMotion(tuple(row[3])):
+            if self._system.DestroyEntity(entity):
+                return None
+            self._log.error("[AnvilCraft] ejected item could not be retracted after motion failure id=%s dim=%s pos=%s",
+                            entity, dim, pos)
+        return entity
 
     def send(self, dim, deliveries):
-        for pos, item in deliveries:
+        for delivery in deliveries:
+            pos, item = delivery[:2]
             row = [dim, list(pos), item]
+            if len(delivery) == 3:
+                row.append(list(delivery[2]))
             if not self._spawn(row):
                 self.pending.append(row)
                 self._dirty = True

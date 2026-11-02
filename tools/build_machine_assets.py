@@ -31,7 +31,12 @@ def cube(origin, size, texture=0):
 
 
 def main():
-    resources = {"format_version": [1, 1, 0]}
+    path = os.path.join(ROOT, "resource_pack", "blocks.json")
+    if os.path.isfile(path):
+        with open(path, "rb") as handle:
+            resources = json.load(handle)
+    else:
+        resources = {"format_version": [1, 1, 0]}
     names = []
     for name, title, top, attachment in TABLES:
         identifier = "anvilcraft:" + name

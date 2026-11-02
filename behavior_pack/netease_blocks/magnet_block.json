@@ -1,0 +1,25 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "category": "construction",
+            "identifier": "anvilcraft:magnet_block"
+        },
+        "components": {
+            "netease:block_entity": {
+                "tick": true,
+                "movable": false
+            },
+            "minecraft:block_light_absorption": 0,
+            "netease:listen_block_remove": {
+                "value": true
+            },
+            "minecraft:loot": "loot_tables/blocks/magnet_block.json",
+            "minecraft:explosion_resistance": 6.0,
+            "minecraft:destroy_time": 2.0,
+            "netease:redstone": {
+                "type": "consumer"
+            }
+        }
+    }
+}

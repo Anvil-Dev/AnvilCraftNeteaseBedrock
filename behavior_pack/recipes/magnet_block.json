@@ -1,0 +1,25 @@
+{
+    "minecraft:recipe_shaped": {
+        "result": {
+            "count": 1,
+            "item": "anvilcraft:magnet_block"
+        },
+        "pattern": [
+            "AAA",
+            "AAA",
+            "AAA"
+        ],
+        "description": {
+            "identifier": "anvilcraft:magnet_block"
+        },
+        "key": {
+            "A": {
+                "item": "anvilcraft:magnet_ingot"
+            }
+        },
+        "tags": [
+            "crafting_table"
+        ]
+    },
+    "format_version": "1.12.0"
+}
