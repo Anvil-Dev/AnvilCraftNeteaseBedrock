@@ -3,6 +3,7 @@
 *$py.class
 __pycache__/
 .venv/
+/.sdk/
 venv/
 env/
 .tox/

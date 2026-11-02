@@ -1,0 +1,21 @@
+{
+    "format_version": "1.16.100",
+    "minecraft:block": {
+        "description": {
+            "identifier": "anvilcraft_lab:sample_container",
+            "category": "construction",
+            "base_block": "netease_container"
+        },
+        "components": {
+            "netease:block_container": {
+                "custom_description": "实验样品箱",
+                "screen_name": "anvilcraft_lab_case.screen",
+                "container_size": 9,
+                "hopper": {
+                    "input": true,
+                    "output": true
+                }
+            }
+        }
+    }
+}

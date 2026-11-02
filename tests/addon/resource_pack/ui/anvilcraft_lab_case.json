@@ -1,0 +1,24 @@
+{
+    "namespace": "anvilcraft_lab_case",
+    "slot@common.container_item": { "$item_collection_name": "netease_container" },
+    "contents": {
+        "type": "stack_panel",
+        "size": [162, "100%c"],
+        "controls": [
+            { "title": { "type": "label", "text": "实验样品箱", "size": [162, 12] } },
+            { "slots": {
+                "type": "grid", "size": [162, 18], "grid_dimensions": [9, 1],
+                "grid_item_template": "anvilcraft_lab_case.slot",
+                "collection_name": "netease_container", "maximum_grid_items": 9
+            } },
+            { "inventory@common.inventory_panel_bottom_half_with_label": {} },
+            { "hotbar@common.hotbar_grid_template": {} },
+            { "close@common.close_button": { "size": [24, 24] } }
+        ]
+    },
+    "screen@common.inventory_screen_common": {
+        "$screen_content": "anvilcraft_lab_case.contents",
+        "$screen_bg_content": "common.screen_background",
+        "$screen_background_alpha": 0.75
+    }
+}

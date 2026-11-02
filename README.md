@@ -12,6 +12,8 @@
 
 当前仓库处于前期开发阶段，已完成玩法迁移规划与开发环境配置，游戏内功能尚未发布。
 
+使用网易 3.10 工作台开发测试时，在仓库根目录运行 `python -B tools/package_addon.py`，再通过「本地导入」选择 `dist/AnvilCraft-Studio.zip`。[导入说明](docs/development.md#在-mc-studio-导入附加包)
+
 ## 规划玩法
 
 模组围绕铁砧与红石机械扩展生存体验，按以下阶段推进实现：

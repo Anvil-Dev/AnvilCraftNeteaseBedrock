@@ -2,7 +2,7 @@
 
 本文档基于上游 AnvilCraft 源码与网易 ModSDK 官方文档，梳理各玩法系统在基岩版中的实现方式、技术改造点与 API 限制。
 
-上游源码与官方接口索引见 [sources.md](sources.md)，分阶段推进与验收标准见 [development-plan.md](development-plan.md)。当前所有玩法均处于设计阶段，尚未在游戏客户端内实测。
+上游源码与官方接口索引见 [sources.md](sources.md)，分阶段推进与验收标准见 [development-plan.md](development-plan.md)。方块粉碎已接入两条配方，原版铁砧的落地事件仍待客户端实测。
 
 ## 对照基线
 
@@ -12,7 +12,7 @@
 | 分支与提交 | `dev/1.21/1.6`，`ef65f8a876c4d4d695a2f263f3f62d9280e10dad`（提交日期 2026-11-01，工作区无未提交改动） |
 | 上游技术栈 | Java 21、NeoForge、`mod_version=1.6.0`、Minecraft `[1.21,1.21.1)` |
 | 静态配方规模 | 两个 `data/anvilcraft/recipe/` 目录共 1,628 个 JSON、53 种 `type`（其中 `anvilcraft:*` 44 种共 1,049 个文件，详见 [source-inventory.json](source-inventory.json)） |
-| 本地开发环境 | Python 2.7.18、`mc-netease-sdk==3.9.0.79920` |
+| 本地开发环境 | Python 2.7.18、`mc-netease-sdk==3.10.0.81573` |
 
 上游模组依赖 NeoForge 注册表、Mixin、AnvilLib 世界配方、Java Data Component 以及自定义渲染管线。移植到网易基岩版时，我们保留上游的原料产物配比、加工条件与数值公式，将运行逻辑改写为 ModSDK 事件驱动的 Python 2.7 脚本，并重新建立物品 ID、方块状态、标签与存档数据的映射关系（参考 [sources.md](sources.md) 中的 S1–S6）。
 

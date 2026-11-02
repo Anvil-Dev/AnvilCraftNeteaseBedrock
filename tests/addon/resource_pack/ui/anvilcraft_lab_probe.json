@@ -1,0 +1,20 @@
+{
+    "namespace": "anvilcraft_lab_probe",
+    "button@common_buttons.light_text_button": { "size": [76, 28] },
+    "main": {
+        "type": "screen", "absorbs_input": true, "is_showing_menu": true,
+        "render_game_behind": true,
+        "controls": [{ "panel": {
+            "type": "image", "texture": "textures/ui/dialog_background_opaque",
+            "size": [250, 146],
+            "controls": [
+                { "title": { "type": "label", "text": "接口实验", "offset": [0, -56] } },
+                { "status": { "type": "label", "size": [232, 72],
+                    "text_alignment": "left", "text": "", "offset": [0, -5] } },
+                { "read@anvilcraft_lab_probe.button": { "$button_text": "读取", "offset": [-80, 51] } },
+                { "sample@anvilcraft_lab_probe.button": { "$button_text": "写入样品", "offset": [0, 51] } },
+                { "close@anvilcraft_lab_probe.button": { "$button_text": "关闭", "offset": [80, 51] } }
+            ]
+        } }]
+    }
+}

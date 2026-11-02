@@ -1,0 +1,5 @@
+{
+    "type": "block",
+    "identifier": "anvilcraft:impact_anvils",
+    "items": ["minecraft:anvil"]
+}

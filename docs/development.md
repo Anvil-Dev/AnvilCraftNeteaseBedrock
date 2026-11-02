@@ -7,7 +7,7 @@
 | 项目 | 配置值 | 检查命令 |
 | --- | --- | --- |
 | Python 解释器 | `2.7.18`（[`.python-version`](../.python-version)） | `python --version` |
-| ModSDK 补全包 | `mc-netease-sdk==3.9.0.79920`（[`requirements-dev.txt`](../requirements-dev.txt)） | `python -m pip show mc-netease-sdk` |
+| ModSDK 补全包 | `mc-netease-sdk==3.10.0.81573`（[`requirements-dev.txt`](../requirements-dev.txt)） | `python -m pip show mc-netease-sdk` |
 | 文本与缩进格式 | UTF-8、LF、4 空格缩进（[`.editorconfig`](../.editorconfig)） | `git diff --check` |
 | 静态语法检查 | 标准库脚本 [`tools/check.py`](../tools/check.py) | `python tools/check.py` |
 
@@ -17,11 +17,11 @@
 python -m pip install -r requirements-dev.txt
 ```
 
-`mc-netease-sdk` 仅提供 `RegisterSystem`、`GetEngineCompFactory` 等函数的类型与签名声明，不包含游戏引擎运行时逻辑。PyPI 上已有更新的 `3.10.0.81573` 版本（见 [PyPI 发布页](https://pypi.org/project/mc-netease-sdk/3.9.0.79920/)），当前固定 `3.9.0.79920` 用于锁定初始开发环境，阶段 0 确定目标客户端版本后再同步升级。
+项目以网易 ModSDK 3.10 和基岩引擎 1.21.130 为目标。`mc-netease-sdk` 提供 `RegisterSystem`、`GetEngineCompFactory` 等接口声明，游戏内实测使用网易客户端。[网易 3.10 更新说明](https://mc.163.com/dev/mcmanual/mc-dev/mcdocs/1-ModAPI/更新信息/3.10.html?catalog=1) · [补全包发布页](https://pypi.org/project/mc-netease-sdk/3.10.0.81573/)
 
 ## 目录结构
 
-当前仓库包含文档与检查工具：
+当前仓库包含行为包、资源包、实验包与开发工具。
 
 ```text
 AnvilCraftNeteaseBedrock/
@@ -35,6 +35,10 @@ AnvilCraftNeteaseBedrock/
 ├── README.en_US.md
 ├── README.md
 ├── requirements-dev.txt
+├── behavior_pack/
+├── resource_pack/
+├── tests/
+│   └── addon/
 ├── docs/
 │   ├── README.md
 │   ├── development.md
@@ -43,10 +47,11 @@ AnvilCraftNeteaseBedrock/
 │   ├── source-inventory.json
 │   └── sources.md
 └── tools/
-    └── check.py
+    ├── check.py
+    └── package_addon.py
 ```
 
-进入阶段 0 并在 MC Studio 中创建可加载工程时，按以下结构建立行为包、资源包与测试目录：
+阶段 0 已建立基础包，后续玩法沿用以下目录分工。
 
 | 目录或文件 | 用途 |
 | --- | --- |
@@ -76,9 +81,18 @@ AnvilCraftNeteaseBedrock/
 
 ```powershell
 python tools/check.py
+python -B -m unittest discover -s tests -v
 git diff --check
 ```
 
 `tools/check.py` 会遍历 `behavior_pack/`、`resource_pack/`、`docs/`、`tools/` 和 `tests/`，验证所有 `.py` 与 `.json` 文件的 UTF-8 编码，调用 Python 2.7 `compile()` 检查脚本语法（不生成 `.pyc`），并用 `json.loads()` 校验 JSON 文件。全部通过返回 `0`，文件校验失败返回 `1`，Python 版本不是 2.7 返回 `2`。
 
 纯算法与状态机使用标准库 `unittest` 编写单元测试。引擎事件触发顺序、方块实体持久化、容器读写、多人联机同步和存档重载需在 MC Studio 测试存档中实测。打包产物输出到 `dist/`，本地测试存档放在 `worlds/` 或 `run/`（均已配置 `.gitignore` 忽略）。包 UUID 以及已发布的物品、方块标识符一旦对外发布不得更改；修改存档数据结构时必须提供旧版本兼容迁移逻辑。
+
+## 在 MC Studio 导入附加包
+
+1. 在仓库根目录运行 `python -B tools/package_addon.py`。
+2. 打开工作台的「本地导入」，选择基岩版附加包，勾选「复制文件到默认文件夹」，选择 `dist/AnvilCraft-Studio.zip`。使用文件夹导入时，先将此 ZIP 单独解压，选择直接包含两个包目录的那一级。
+3. 从作品库选择导入的组件，启动「开发测试」。进入世界后，在 Mod 日志中查看 `[AnvilCraft] server ready` 和 `[AnvilCraft] client ready`。如需测试重力铁砧和检测台，再单独导入 `dist/AnvilCraft-Lab-Studio.zip`，在同一测试世界启用主包和实验包。
+
+工作台通过行为包的 `entities/` 和资源包的 `textures/` 识别包类型，每个目录都与各自的 `manifest.json` 同级。仓库沿用网易模板中的空文件 `.dummy`，使 Git 检出、打包和工作台复制都保留这两个目录。出现「缺少 Manifest 配置文件」时，先核对所选 ZIP 解压后的这两组路径。[网易附加包结构与导入说明](https://mc.163.com/dev/mcmanual/mc-dev/mconline/10-addon教程/第18章：打包导出你的作品/课程01.包体的结构和导入.html?catalog=1)

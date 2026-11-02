@@ -1,0 +1,47 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "铁砧工艺 · 接口实验",
+        "description": "仅用于阶段 0 的测试存档",
+        "uuid": "9e05d660-c1ec-4453-9917-1bd5d2058e77",
+        "version": [
+            0,
+            1,
+            0
+        ],
+        "min_engine_version": [
+            1,
+            21,
+            130
+        ]
+    },
+    "modules": [
+        {
+            "type": "data",
+            "uuid": "54626304-54df-41f8-bfa2-b9b9d61de1b9",
+            "version": [
+                0,
+                1,
+                0
+            ]
+        }
+    ],
+    "dependencies": [
+        {
+            "uuid": "c7bf30be-61d3-4213-a142-cc45b4368a7b",
+            "version": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "uuid": "966c9834-c910-4819-9bb7-3179b1c50e57",
+            "version": [
+                0,
+                1,
+                0
+            ]
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+tile.anvilcraft_lab:falling_anvil.name=测试重力铁砧
+tile.anvilcraft_lab:probe.name=接口检测台
+tile.anvilcraft_lab:signal_source.name=实验信号源（10 级）
+tile.anvilcraft_lab:sample_container.name=实验样品箱

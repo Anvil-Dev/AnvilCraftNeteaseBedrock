@@ -1,0 +1,29 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "铁砧工艺 · 资源",
+        "description": "铁砧工艺资源包",
+        "uuid": "637d5a1b-a0d3-482a-bba3-6cd0815f0fea",
+        "version": [
+            0,
+            1,
+            0
+        ],
+        "min_engine_version": [
+            1,
+            21,
+            130
+        ]
+    },
+    "modules": [
+        {
+            "type": "resources",
+            "uuid": "2830265a-6c59-464e-868f-47ed1d920718",
+            "version": [
+                0,
+                1,
+                0
+            ]
+        }
+    ]
+}

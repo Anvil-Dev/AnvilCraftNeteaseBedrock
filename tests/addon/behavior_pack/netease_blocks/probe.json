@@ -1,0 +1,17 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "anvilcraft_lab:probe",
+            "category": "construction"
+        },
+        "components": {
+            "netease:redstone": {
+                "type": "consumer"
+            },
+            "netease:block_entity": {
+                "tick": false
+            }
+        }
+    }
+}

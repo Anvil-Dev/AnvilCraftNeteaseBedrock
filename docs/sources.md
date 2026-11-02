@@ -27,7 +27,7 @@
 
 | 编号 | 官方文档页面 | 关注要点 |
 | --- | --- | --- |
-| N1 | [mc-netease-sdk PyPI 页面](https://pypi.org/project/mc-netease-sdk/3.9.0.79920/) | Python 2 补全包用途、本地锁定的 `3.9.0.79920` 版本及公开的 `3.10.0.81573` 版本信息 |
+| N1 | [网易 3.10 更新说明](https://mc.163.com/dev/mcmanual/mc-dev/mcdocs/1-ModAPI/更新信息/3.10.html?catalog=1)、[mc-netease-sdk PyPI 页面](https://pypi.org/project/mc-netease-sdk/3.10.0.81573/) | 目标基岩引擎 `1.21.130`、Python 2 补全包 `3.10.0.81573` |
 | N2 | [自定义重力方块](https://mc.163.com/dev/mcmanual/mc-dev/mcguide/20-玩法开发/15-自定义游戏内容/2-自定义方块/3-特殊方块/6-自定义重力方块.html) | `custom_heavy_block` 基础类型、`netease:fall` 组件、Python 事件开关与落地伤害参数 |
 | N3 | [方块事件文档](https://mc.163.com/dev/mcmanual/mc-dev/mcdocs/1-ModAPI/事件/方块.html) | 开始下落、落地还原、破坏为掉落物、红石信号强度变化与方块实体 Tick 事件参数 |
 | N4 | [自定义方块实体指南](https://mc.163.com/dev/mcmanual/mc-dev/mcguide/20-玩法开发/15-自定义游戏内容/2-自定义方块/4-自定义方块实体.html) | `netease:block_entity` 配置、每秒 20 次 Tick 触发范围与扩展数据用法 |
@@ -39,7 +39,7 @@
 | N10 | [方块组合（调色板）接口](https://mc.163.com/dev/mcmanual/mc-dev/mcdocs/1-ModAPI/接口/世界/方块组合.html) | `GetBlockPaletteBetweenPos`、`SetBlockByBlockPalette`、旋转、床/门处理与冲突中断行为 |
 | N11 | [地图与维度接口](https://mc.163.com/dev/mcmanual/mc-dev/mcdocs/1-ModAPI/接口/世界/地图.html) | `CreateDimension`、`CheckChunkState` 与自定义维度注册要求 |
 
-除在线文档外，还在本地核对了 `mc-netease-sdk==3.9.0.79920` 包内 `blockInfoCompServer.py`、`blockEntityExDataCompServer.py`、`itemCompServer.py`、`redStoneCompServer.py` 和 `extraServerApi.py` 的函数签名。
+初次调研使用 `3.9.0.79920` 补全包。阶段 0 按目标版本 `3.10.0.81573` 核对了方块替换、标签查询、容器物品读写与方块实体数据接口。
 
 ## 静态配方统计方法
 

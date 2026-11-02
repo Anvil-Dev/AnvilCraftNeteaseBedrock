@@ -1,0 +1,29 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "铁砧工艺 · 实验资源",
+        "description": "接口实验方块与触屏面板",
+        "uuid": "966c9834-c910-4819-9bb7-3179b1c50e57",
+        "version": [
+            0,
+            1,
+            0
+        ],
+        "min_engine_version": [
+            1,
+            21,
+            130
+        ]
+    },
+    "modules": [
+        {
+            "type": "resources",
+            "uuid": "cabe08b2-399a-43c3-b63e-684254bfd4aa",
+            "version": [
+                0,
+                1,
+                0
+            ]
+        }
+    ]
+}

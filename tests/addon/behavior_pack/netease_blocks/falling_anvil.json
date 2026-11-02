@@ -1,0 +1,16 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "anvilcraft_lab:falling_anvil",
+            "category": "construction",
+            "base_block": "custom_heavy_block"
+        },
+        "components": {
+            "netease:fall": {
+                "send_python_event": true,
+                "hurt_entity": false
+            }
+        }
+    }
+}

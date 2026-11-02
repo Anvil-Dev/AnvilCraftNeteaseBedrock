@@ -13,4 +13,6 @@
 
 调研文档记录玩法、源码位置和迁移方案。每次实际移植代码或引入资源时，需要记录上游路径、提交与修改内容，以便保留归属信息并跟踪更新。
 
+阶段 0 的方块粉碎沿用上述提交中 `src/generated/resources/data/anvilcraft/recipe/block_crush/gravel.json` 与 `sand.json` 的输入和产物，落地结算按网易事件在 Python 2.7 中重新实现。实验方块引用游戏自带的纹理图集，实验界面的 JSON 与中文名称由本项目编写。
+
 开发依赖 `mc-netease-sdk` 是网易发布的接口补全包，其版权与许可归属该依赖自身；游戏发布包通过网易运行环境调用 ModSDK。

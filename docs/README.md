@@ -7,11 +7,11 @@
 | 项目 | 当前配置 |
 | --- | --- |
 | 运行与脚本语言 | Python `2.7.18`（见 [`.python-version`](../.python-version)） |
-| ModSDK 补全包 | `mc-netease-sdk==3.9.0.79920`（见 [`requirements-dev.txt`](../requirements-dev.txt)） |
+| 目标引擎与 ModSDK | 基岩引擎 `1.21.130`、网易 ModSDK `3.10`、补全包 `mc-netease-sdk==3.10.0.81573`（见 [`requirements-dev.txt`](../requirements-dev.txt)） |
 | 对照上游仓库 | [Anvil-Dev/AnvilCraft](https://github.com/Anvil-Dev/AnvilCraft) |
 | 对照分支与提交 | `dev/1.21/1.6`，`ef65f8a876c4d4d695a2f263f3f62d9280e10dad`（模组版本 `1.6.0`） |
 | 调研与统计日期 | 2026-11-02 |
-| 当前代码状态 | 已完成仓库初始化与调研，游戏内功能尚未开始实现 |
+| 当前代码状态 | 阶段 0 进行中。主包已接入两条方块粉碎配方，工作台导入方法见 [开发规范](development.md#在-mc-studio-导入附加包) |
 
 ## 文档列表
 
