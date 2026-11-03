@@ -82,6 +82,8 @@ def compile_assets(upstream, minecraft):
         elif name == "magnetic_chute":
             # 六面朝向以北为基准，上游的磁力溜槽基础模型朝上。
             variants[0] = (model, [90, 0, 0])
+        elif name in ("magnet_block", "hollow_magnet_block"):
+            variants.append((models.read("anvilcraft:block/demagnetized_" + name), None))
         used = sorted(set(models.texture(variant, face["texture"]) for variant, _ in variants
                           for element in variant["elements"] for face in element["faces"].values()))
         textures, geometries, renderers, geometry_rows = {}, {}, [], []
@@ -101,7 +103,8 @@ def compile_assets(upstream, minecraft):
                         "textures": ["Texture." + key]}
             if len(variants) > 1:
                 renderer["arrays"] = {"geometries": {"Array.shape": identifiers}}
-                renderer["geometry"] = "Array.shape[variable.anvilcraft_down ? 0 : 1]"
+                selector = "variable.anvilcraft_down ? 0 : 1" if name == "chute" else "variable.anvilcraft_lit"
+                renderer["geometry"] = "Array.shape[" + selector + "]"
             controllers[render_id] = renderer
             renderers.append(render_id)
         particle = models.texture(model, model["textures"]["particle"])
@@ -110,6 +113,8 @@ def compile_assets(upstream, minecraft):
                        "textures": textures, "geometry": geometries, "render_controllers": renderers}
         if name == "chute":
             description["scripts"] = {"initialize": ["variable.anvilcraft_down = 1;"]}
+        elif name in ("magnet_block", "hollow_magnet_block"):
+            description["scripts"] = {"initialize": ["variable.anvilcraft_lit = 0;"]}
         generated["resource_pack/entity/" + name + ".entity.json"] = encode({
             "format_version": "1.10.0", "minecraft:client_entity": {"description": description}})
         generated["resource_pack/models/entity/" + name + ".geo.json"] = encode({

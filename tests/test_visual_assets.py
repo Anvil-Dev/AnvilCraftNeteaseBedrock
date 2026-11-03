@@ -20,6 +20,7 @@ from cStringIO import StringIO
 from PIL import Image
 from anvilcraft_scripts.client.visual_events import VisualEvents
 from anvilcraft_scripts.common.logistics import CHUTE
+from anvilcraft_scripts.common.magnets import MAGNETS, REQUEST_EVENT, STATE_EVENT
 
 
 class ModelTests(unittest.TestCase):
@@ -132,6 +133,7 @@ class Client(object):
         self.callbacks, self.blocks, self.variables = {}, {}, {}
         self.dimension = 0
         self.allow_update = True
+        self.requests = []
 
     def GetEngineCompFactory(self):
         return self
@@ -144,6 +146,12 @@ class Client(object):
 
     def GetEngineSystemName(self):
         return "Engine"
+
+    def GetLocalPlayerId(self):
+        return "player"
+
+    def NotifyToServer(self, name, data):
+        self.requests.append((name, deepcopy(data)))
 
     def ListenForEvent(self, namespace, system, name, receiver, callback):
         self.callbacks[name] = callback
@@ -167,6 +175,29 @@ class Client(object):
 
 
 class VisualTests(unittest.TestCase):
+
+    def test_powered_magnet_loaded_late_retries_model_and_survives_dimension_changes(self):
+        world = Client()
+        events = VisualEvents(world)
+        events.listen(world)
+        pos = (0, 64, 0)
+        for name in MAGNETS:
+            world.blocks[pos] = name, 0
+            args = dict(blockName=name, dimensionId=0, posX=0, posY=64, posZ=0)
+            world.callbacks["ModBlockEntityLoadedClientEvent"](args)
+            self.assertEqual(REQUEST_EVENT, world.requests[-1][0])
+            world.allow_update = False
+            world.callbacks[STATE_EVENT](dict(dimensionId=0, pos=list(pos), lit=True))
+            world.allow_update = True
+            world.callbacks["ModBlockEntityTickClientEvent"](args)
+            self.assertEqual(1, world.variables[pos, "variable.anvilcraft_lit"])
+            world.dimension = 1
+            world.callbacks[STATE_EVENT](dict(dimensionId=0, pos=list(pos), lit=False))
+            self.assertEqual(1, world.variables[pos, "variable.anvilcraft_lit"])
+            world.dimension = 0
+            world.callbacks["ModBlockEntityTickClientEvent"](args)
+            self.assertEqual(0, world.variables[pos, "variable.anvilcraft_lit"])
+            world.callbacks["ModBlockEntityRemoveClientEvent"](args)
 
     def test_initialization_retry_and_far_direction_changes_update_the_same_model(self):
         world = Client()

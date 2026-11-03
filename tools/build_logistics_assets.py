@@ -28,9 +28,7 @@ def main(upstream):
     for name, title in BLOCKS:
         held, chute = name.startswith("held_"), name.endswith("chute")
         identifier = "anvilcraft:" + name
-        description = {"identifier": identifier, "category": "construction"}
-        if held:
-            description["register_to_create_menu"] = False
+        description = {"identifier": identifier, "category": "none" if held else "construction"}
         components = {
             "minecraft:destroy_time": 5.0 if held else 2.0,
             "minecraft:explosion_resistance": 6.0,
@@ -41,6 +39,8 @@ def main(upstream):
         }
         if chute or not held:
             components["netease:redstone"] = {"type": "consumer"}
+        if name in ("magnet_block", "hollow_magnet_block"):
+            components["netease:block_entity"]["client_tick"] = True
         if chute:
             components["netease:face_directional"] = {"type": "facing_direction"}
             if name == "chute":

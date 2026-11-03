@@ -9,7 +9,7 @@ from test_stations import Machines
 from test_drop_work import GroundItem, LOG
 from anvilcraft_scripts.common.drop_recipes import CRUSH, STAMP
 from anvilcraft_scripts.common.logistics import CHUTE, MAGNETIC_CHUTE
-from anvilcraft_scripts.common.magnets import HELD, MAGNETS
+from anvilcraft_scripts.common.magnets import HELD, MAGNETS, REQUEST_EVENT, STATE_EVENT
 from anvilcraft_scripts.server.impact_events import ImpactEvents
 
 
@@ -39,6 +39,13 @@ class Factory(Machines):
         self.motions = {}
         self.sneaking = False
         self.refuse_motion = False
+        self.messages = []
+
+    def BroadcastToAllClient(self, name, data):
+        self.messages.append((None, name, copy.deepcopy(data)))
+
+    def NotifyToClient(self, player, name, data):
+        self.messages.append((player, name, copy.deepcopy(data)))
 
     def CreateRedStone(self, level):
         return self
@@ -125,6 +132,8 @@ class MechanismTests(unittest.TestCase):
 
     def tick(self, pos, times=1):
         for _ in range(times):
+            self.events._tick += 2
+            self.stations.tick = self.events._tick
             self.world.callbacks["ServerBlockEntityTickEvent"](dict(
                 blockName=self.world.cells[0, pos], dimension=0, posX=pos[0], posY=pos[1], posZ=pos[2]))
 
@@ -137,6 +146,57 @@ class MechanismTests(unittest.TestCase):
 
     def dropped(self, name):
         return [row for row in self.world.drops.values() if row.item["newItemName"] == "minecraft:" + name]
+
+    def test_both_magnets_sync_power_and_late_join_without_client_control_of_state(self):
+        for name in MAGNETS:
+            self.cell(self.magnet, name)
+            self.world.power.add((0, self.magnet))
+            self.tick(self.magnet)
+            self.assertTrue(self.world.messages[-1][2]["lit"])
+            event = dict(playerId="player", dimensionId=0, pos=list(self.magnet), lit=False)
+            self.world.callbacks[REQUEST_EVENT](event)
+            self.assertEqual(("player", STATE_EVENT), self.world.messages[-1][:2])
+            self.assertTrue(self.world.messages[-1][2]["lit"])
+            count = len(self.world.messages)
+            self.world.player.dim = 1
+            self.world.callbacks[REQUEST_EVENT](event)
+            self.world.callbacks[REQUEST_EVENT](dict(event, dimensionId=None))
+            self.assertEqual(count, len(self.world.messages))
+            self.world.player.dim = 0
+            self.world.power.clear()
+            self.tick(self.magnet)
+            self.assertTrue(self.world.messages[-1][2]["lit"])
+            self.tick(self.magnet, 3)
+            self.assertFalse(self.world.messages[-1][2]["lit"])
+
+    def test_power_return_cancels_magnet_off_delay_and_keeps_anvil_released(self):
+        self.cell(self.magnet, MAGNETS[0])
+        self.world.power.add((0, self.magnet))
+        self.tick(self.magnet)
+        self.world.power.clear()
+        self.cell((0, 64, 0), "minecraft:anvil")
+        self.tick(self.magnet, 2)
+        self.assertEqual("minecraft:anvil", self.world.cells[0, (0, 64, 0)])
+        self.world.power.add((0, self.magnet))
+        self.tick(self.magnet, 5)
+        self.assertEqual("minecraft:anvil", self.world.cells[0, (0, 64, 0)])
+        self.world.power.clear()
+        self.tick(self.magnet, 4)
+        self.assertEqual(HELD["minecraft:anvil"], self.world.cells[0, (0, 67, 0)])
+
+    def test_failed_held_placement_does_not_block_powered_appearance(self):
+        self.cell(self.magnet, MAGNETS[0])
+        self.cell((0, 64, 0), "minecraft:anvil")
+        self.world.refuse_cells.add((0, (0, 67, 0)))
+        self.tick(self.magnet)
+        self.assertEqual("placing", self.magnets._data.get(0, self.magnet)["phase"])
+        self.world.power.add((0, self.magnet))
+        self.world.callbacks["BlockStrengthChangedServerEvent"](dict(
+            blockName=MAGNETS[0], dimensionId=0, posX=0, posY=68, posZ=0, newStrength=15))
+        self.assertTrue(self.world.messages[-1][2]["lit"])
+        self.world.power.clear()
+        self.tick(self.magnet, 4)
+        self.assertFalse(self.world.messages[-1][2]["lit"])
 
     def test_magnet_lifts_holds_and_releases_original_damage_and_orientation(self):
         self.cell(self.magnet, MAGNETS[0])
@@ -536,7 +596,7 @@ class MechanismTests(unittest.TestCase):
         for index in range(2):
             self.cell(source, "minecraft:anvil")
             self.world.power.clear()
-            self.tick(self.magnet)
+            self.tick(self.magnet, 4)
             self.world.power.add((0, self.magnet))
             self.tick(self.magnet)
             self.record(self.pos, self.item("bone", 1))

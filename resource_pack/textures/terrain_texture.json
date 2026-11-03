@@ -25,6 +25,15 @@
         "anvilcraft_block_damaged_anvil_top": {
             "textures": "textures/blocks/anvil_top_damaged_2"
         },
+        "anvilcraft_block_demagnetized_magnet_block_bottom": {
+            "textures": "textures/anvilcraft/block/demagnetized_magnet_block_bottom"
+        },
+        "anvilcraft_block_demagnetized_magnet_block_side": {
+            "textures": "textures/anvilcraft/block/demagnetized_magnet_block_side"
+        },
+        "anvilcraft_block_demagnetized_magnet_block_top": {
+            "textures": "textures/anvilcraft/block/demagnetized_magnet_block_top"
+        },
         "anvilcraft_block_magnet_block_bottom": {
             "textures": "textures/anvilcraft/block/magnet_block_bottom"
         },

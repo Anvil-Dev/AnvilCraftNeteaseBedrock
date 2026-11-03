@@ -4,8 +4,17 @@
         "description": {
             "geometry": {
                 "material_0_0": "geometry.anvilcraft.magnet_block.material_0_0",
+                "material_0_1": "geometry.anvilcraft.magnet_block.material_0_1",
                 "material_1_0": "geometry.anvilcraft.magnet_block.material_1_0",
-                "material_2_0": "geometry.anvilcraft.magnet_block.material_2_0"
+                "material_1_1": "geometry.anvilcraft.magnet_block.material_1_1",
+                "material_2_0": "geometry.anvilcraft.magnet_block.material_2_0",
+                "material_2_1": "geometry.anvilcraft.magnet_block.material_2_1",
+                "material_3_0": "geometry.anvilcraft.magnet_block.material_3_0",
+                "material_3_1": "geometry.anvilcraft.magnet_block.material_3_1",
+                "material_4_0": "geometry.anvilcraft.magnet_block.material_4_0",
+                "material_4_1": "geometry.anvilcraft.magnet_block.material_4_1",
+                "material_5_0": "geometry.anvilcraft.magnet_block.material_5_0",
+                "material_5_1": "geometry.anvilcraft.magnet_block.material_5_1"
             },
             "identifier": "anvilcraft:magnet_block",
             "materials": {
@@ -14,12 +23,23 @@
             "render_controllers": [
                 "controller.render.anvilcraft.magnet_block.material_0",
                 "controller.render.anvilcraft.magnet_block.material_1",
-                "controller.render.anvilcraft.magnet_block.material_2"
+                "controller.render.anvilcraft.magnet_block.material_2",
+                "controller.render.anvilcraft.magnet_block.material_3",
+                "controller.render.anvilcraft.magnet_block.material_4",
+                "controller.render.anvilcraft.magnet_block.material_5"
             ],
+            "scripts": {
+                "initialize": [
+                    "variable.anvilcraft_lit = 0;"
+                ]
+            },
             "textures": {
-                "material_0": "textures/anvilcraft/block/magnet_block_bottom",
-                "material_1": "textures/anvilcraft/block/magnet_block_side",
-                "material_2": "textures/anvilcraft/block/magnet_block_top"
+                "material_0": "textures/anvilcraft/block/demagnetized_magnet_block_bottom",
+                "material_1": "textures/anvilcraft/block/demagnetized_magnet_block_side",
+                "material_2": "textures/anvilcraft/block/demagnetized_magnet_block_top",
+                "material_3": "textures/anvilcraft/block/magnet_block_bottom",
+                "material_4": "textures/anvilcraft/block/magnet_block_side",
+                "material_5": "textures/anvilcraft/block/magnet_block_top"
             }
         }
     }

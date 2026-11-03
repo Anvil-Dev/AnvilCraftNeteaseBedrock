@@ -4,15 +4,16 @@
 
 from math import floor
 
-from anvilcraft_scripts.common.magnets import HELD, MAGNETS, PASSABLE
+from anvilcraft_scripts.common.magnets import HELD, MAGNETS, PASSABLE, STATE_EVENT
 from anvilcraft_scripts.server.inventory import Inventories
 
 
 class MagnetWork(object):
     """吸起和释放均先保存恢复凭据，区块未加载时保留凭据。"""
 
-    def __init__(self, api, log, stations, can_lift):
+    def __init__(self, api, system, log, stations, can_lift):
         self._factory, self._level = api.GetEngineCompFactory(), api.GetLevelId()
+        self._system = system
         self._log, self._stations = log, stations
         self._can_lift = can_lift
         self._data = Inventories(self._factory, self._level, log, "anvilcraft:magnet_holds_v1")
@@ -21,6 +22,8 @@ class MagnetWork(object):
         self._released = set()
         self._release_started = set()
         self._reported = set()
+        self._lit = {}
+        self._off_at = {}
 
     def _block(self, dim, pos):
         block = self._factory.CreateBlockInfo(self._level).GetBlockNew(tuple(pos), dim)
@@ -36,7 +39,44 @@ class MagnetWork(object):
 
     def _powered(self, dim, pos):
         redstone = self._factory.CreateRedStone(self._level)
-        return redstone.GetBlockPoweredState(tuple(pos), dim) or redstone.GetStrength(tuple(pos), dim) > 0
+        signal = redstone.GetBlockPoweredState(tuple(pos), dim) or redstone.GetStrength(tuple(pos), dim) > 0
+        key = (dim, pos)
+        previous = self._lit.get(key)
+        if signal:
+            lit = True
+            self._off_at.pop(key, None)
+        elif previous:
+            # Java 的熄灭延时为四个游戏 Tick，对应六个脚本 Tick。
+            lit = self._stations.tick < self._off_at.setdefault(key, self._stations.tick + 6)
+        else:
+            lit = False
+        if previous is None or previous != lit:
+            self._lit[key] = lit
+            self._system.BroadcastToAllClient(STATE_EVENT, {
+                "dimensionId": dim, "pos": list(pos), "lit": lit})
+        return lit
+
+    def request_visual(self, args):
+        """客户端加载模型后读取服务端状态，迟加入的玩家也能显示通电贴图。"""
+        player, dim, values = args.get("playerId"), args.get("dimensionId"), args.get("pos")
+        if (not isinstance(player, basestring) or not isinstance(dim, (int, long))
+                or not isinstance(values, list) or len(values) != 3):
+            return
+        if not all(isinstance(value, (int, long)) for value in values):
+            return
+        pos = tuple(values)
+        if not self._loaded(dim, pos) or self._factory.CreateDimension(player).GetEntityDimensionId() != dim:
+            return
+        feet = self._factory.CreatePos(player).GetFootPos()
+        if feet is None or sum((feet[i] - pos[i] - 0.5) ** 2 for i in range(3)) > 128 ** 2:
+            return
+        block = self._block(dim, pos)
+        if block and block["name"] in MAGNETS:
+            self._system.NotifyToClient(player, STATE_EVENT, {
+                "dimensionId": dim, "pos": list(pos), "lit": self._powered(dim, pos)})
+
+    def signal(self, args):
+        self.block_tick(dict(args, dimension=args["dimensionId"]))
 
     def _find(self, dim, pos):
         x, y, z = pos
@@ -184,7 +224,11 @@ class MagnetWork(object):
 
     def block_tick(self, args):
         if args["blockName"] in MAGNETS:
-            self.step(args["dimension"], (args["posX"], args["posY"], args["posZ"]))
+            dim, pos = args["dimension"], (args["posX"], args["posY"], args["posZ"])
+            block = self._block(dim, pos) if self._loaded(dim, pos) else None
+            if block and block["name"] in MAGNETS:
+                self._powered(dim, pos)
+                self.step(dim, pos)
 
     def advance(self, tick):
         if tick % 30 == 0:
@@ -195,6 +239,8 @@ class MagnetWork(object):
         name = args["fullName"]
         dim, cell = args["dimension"], (args["x"], args["y"], args["z"])
         if name in MAGNETS:
+            self._lit.pop((dim, cell), None)
+            self._off_at.pop((dim, cell), None)
             # 拆除事件可能在方块替换完成前发出，下一次恢复扫描会释放铁砧。
             return
         if name in HELD.values():

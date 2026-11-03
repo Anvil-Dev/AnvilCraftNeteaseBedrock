@@ -2,9 +2,8 @@
     "format_version": "1.10.0",
     "minecraft:block": {
         "description": {
-            "category": "construction",
-            "identifier": "anvilcraft:held_anvil",
-            "register_to_create_menu": false
+            "category": "none",
+            "identifier": "anvilcraft:held_anvil"
         },
         "components": {
             "netease:block_entity": {

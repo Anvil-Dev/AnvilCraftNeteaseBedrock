@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""按实际朝向选择原仓库溜槽的竖直与侧向模型。"""
+"""同步磁铁通电状态，并按实际朝向选择原仓库溜槽模型。"""
 
 from anvilcraft_scripts.common.logistics import CHUTE
+from anvilcraft_scripts.common.magnets import MAGNETS, REQUEST_EVENT, STATE_EVENT
 
 
 class VisualEvents(object):
@@ -15,26 +16,46 @@ class VisualEvents(object):
         self._loaded = {}
         self._tick = 0
         self._cursor = 0
+        self._lit = {}
 
     def listen(self, system):
+        self._system = system
         for event, callback in (("ModBlockEntityLoadedClientEvent", self._load),
                                 ("ModBlockEntityRemoveClientEvent", self._remove),
                                 ("ModBlockEntityTickClientEvent", self._update),
                                 ("OnScriptTickClient", self._advance)):
             system.ListenForEvent(self._api.GetEngineNamespace(), self._api.GetEngineSystemName(),
                                   event, self, callback)
+        system.ListenForEvent("AnvilCraft", "Impact", STATE_EVENT, self, self._state)
 
     def _key(self, args):
         return args["dimensionId"], (args["posX"], args["posY"], args["posZ"])
 
     def _load(self, args):
-        if args["blockName"] == CHUTE:
+        if args["blockName"] == CHUTE or args["blockName"] in MAGNETS:
             key = self._key(args)
             self._loaded[key] = None
             self._refresh(key)
+            if args["blockName"] in MAGNETS:
+                self._request(key)
 
     def _remove(self, args):
-        self._loaded.pop(self._key(args), None)
+        key = self._key(args)
+        self._loaded.pop(key, None)
+        self._lit.pop(key, None)
+
+    def _request(self, key):
+        dim, pos = key
+        if self._factory.CreateGame(self._level).GetCurrentDimension() != dim:
+            return
+        self._system.NotifyToServer(REQUEST_EVENT, {
+            "dimensionId": dim, "pos": list(pos), "playerId": self._api.GetLocalPlayerId()})
+
+    def _state(self, args):
+        key = args["dimensionId"], tuple(args["pos"])
+        if key in self._loaded:
+            self._lit[key] = bool(args["lit"])
+            self._refresh(key)
 
     def _update(self, args):
         key = self._key(args)
@@ -49,8 +70,14 @@ class VisualEvents(object):
         current = blocks.GetBlock(pos)
         if current is None:
             return
+        if current[0] in MAGNETS:
+            if key in self._lit and self._loaded[key] != self._lit[key]:
+                if blocks.SetBlockEntityMolangValue(pos, "variable.anvilcraft_lit", float(self._lit[key])):
+                    self._loaded[key] = self._lit[key]
+            return
         if current[0] != CHUTE:
             self._loaded.pop(key, None)
+            self._lit.pop(key, None)
             return
         down = current[1] == 0
         if self._loaded[key] != down:
@@ -65,4 +92,8 @@ class VisualEvents(object):
         for _ in range(min(16, len(keys))):
             self._cursor %= len(keys)
             self._refresh(keys[self._cursor])
+            if keys[self._cursor] in self._loaded and keys[self._cursor] not in self._lit:
+                block = self._factory.CreateBlockInfo(self._level).GetBlock(keys[self._cursor][1])
+                if block and block[0] in MAGNETS:
+                    self._request(keys[self._cursor])
             self._cursor += 1

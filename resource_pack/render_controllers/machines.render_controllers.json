@@ -226,7 +226,15 @@
             ]
         },
         "controller.render.anvilcraft.hollow_magnet_block.material_0": {
-            "geometry": "Geometry.material_0_0",
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_0_0",
+                        "Geometry.material_0_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
             "materials": [
                 {
                     "*": "Material.default"
@@ -237,7 +245,15 @@
             ]
         },
         "controller.render.anvilcraft.hollow_magnet_block.material_1": {
-            "geometry": "Geometry.material_1_0",
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_1_0",
+                        "Geometry.material_1_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
             "materials": [
                 {
                     "*": "Material.default"
@@ -248,7 +264,15 @@
             ]
         },
         "controller.render.anvilcraft.hollow_magnet_block.material_2": {
-            "geometry": "Geometry.material_2_0",
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_2_0",
+                        "Geometry.material_2_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
             "materials": [
                 {
                     "*": "Material.default"
@@ -258,8 +282,73 @@
                 "Texture.material_2"
             ]
         },
+        "controller.render.anvilcraft.hollow_magnet_block.material_3": {
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_3_0",
+                        "Geometry.material_3_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_3"
+            ]
+        },
+        "controller.render.anvilcraft.hollow_magnet_block.material_4": {
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_4_0",
+                        "Geometry.material_4_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_4"
+            ]
+        },
+        "controller.render.anvilcraft.hollow_magnet_block.material_5": {
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_5_0",
+                        "Geometry.material_5_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_5"
+            ]
+        },
         "controller.render.anvilcraft.magnet_block.material_0": {
-            "geometry": "Geometry.material_0_0",
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_0_0",
+                        "Geometry.material_0_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
             "materials": [
                 {
                     "*": "Material.default"
@@ -270,7 +359,15 @@
             ]
         },
         "controller.render.anvilcraft.magnet_block.material_1": {
-            "geometry": "Geometry.material_1_0",
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_1_0",
+                        "Geometry.material_1_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
             "materials": [
                 {
                     "*": "Material.default"
@@ -281,7 +378,15 @@
             ]
         },
         "controller.render.anvilcraft.magnet_block.material_2": {
-            "geometry": "Geometry.material_2_0",
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_2_0",
+                        "Geometry.material_2_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
             "materials": [
                 {
                     "*": "Material.default"
@@ -289,6 +394,63 @@
             ],
             "textures": [
                 "Texture.material_2"
+            ]
+        },
+        "controller.render.anvilcraft.magnet_block.material_3": {
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_3_0",
+                        "Geometry.material_3_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_3"
+            ]
+        },
+        "controller.render.anvilcraft.magnet_block.material_4": {
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_4_0",
+                        "Geometry.material_4_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_4"
+            ]
+        },
+        "controller.render.anvilcraft.magnet_block.material_5": {
+            "arrays": {
+                "geometries": {
+                    "Array.shape": [
+                        "Geometry.material_5_0",
+                        "Geometry.material_5_1"
+                    ]
+                }
+            },
+            "geometry": "Array.shape[variable.anvilcraft_lit]",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_5"
             ]
         },
         "controller.render.anvilcraft.magnetic_chute.material_0": {

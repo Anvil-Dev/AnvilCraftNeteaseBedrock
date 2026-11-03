@@ -9,6 +9,7 @@ from anvilcraft_scripts.server.block_work import BlockWork
 from anvilcraft_scripts.server.stations import Stations
 from anvilcraft_scripts.server.magnet_work import MagnetWork
 from anvilcraft_scripts.server.logistics_work import LogisticsWork
+from anvilcraft_scripts.common.magnets import REQUEST_EVENT
 
 
 def _nbt_value(tag):
@@ -66,7 +67,7 @@ class ImpactEvents(object):
     def listen(self, system):
         self._drop_work = DropWork(self._api, system, self._log)
         self._stations = Stations(self._api, system, self._log, self._drop_work)
-        self._magnets = MagnetWork(self._api, self._log, self._stations, self._can_lift)
+        self._magnets = MagnetWork(self._api, system, self._log, self._stations, self._can_lift)
         self._logistics = LogisticsWork(self._api, self._log, self._stations, self._drop_work)
         for event, callback in (
             ("LoadServerAddonScriptsAfter", self._load_tags),
@@ -81,9 +82,11 @@ class ImpactEvents(object):
             ("ServerBlockUseEvent", self._machine_use),
             ("ServerBlockEntityTickEvent", self._machine_tick),
             ("BlockRemoveServerEvent", self._machine_remove),
+            ("BlockStrengthChangedServerEvent", self._magnets.signal),
         ):
             system.ListenForEvent(self._api.GetEngineNamespace(), self._api.GetEngineSystemName(),
                                   event, self, callback)
+        system.ListenForEvent("AnvilCraft", "Visuals", REQUEST_EVENT, self._magnets, self._magnets.request_visual)
 
     def _machine_use(self, args):
         self._stations.use(args)

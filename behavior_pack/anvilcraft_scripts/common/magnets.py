@@ -3,6 +3,8 @@
 """磁铁与悬持铁砧的方块对应关系。"""
 
 MAGNETS = ("anvilcraft:magnet_block", "anvilcraft:hollow_magnet_block")
+STATE_EVENT = "MagnetState"
+REQUEST_EVENT = "RequestMagnetState"
 HELD = {
     "minecraft:anvil": "anvilcraft:held_anvil",
     "minecraft:chipped_anvil": "anvilcraft:held_chipped_anvil",
