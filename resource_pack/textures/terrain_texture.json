@@ -73,6 +73,12 @@
         "anvilcraft_block_simple_chute_directional": {
             "textures": "textures/anvilcraft/block/simple_chute_directional"
         },
+        "anvilcraft_block_simple_chute_tall_side": {
+            "textures": "textures/anvilcraft/block/simple_chute_tall_side"
+        },
+        "anvilcraft_block_simple_chute_tall_top": {
+            "textures": "textures/anvilcraft/block/simple_chute_tall_top"
+        },
         "anvilcraft_block_simple_magnetic_chute": {
             "textures": "textures/anvilcraft/block/simple_magnetic_chute"
         },

@@ -5,14 +5,22 @@
 import argparse
 import json
 import os
+import sys
 
 from build_machine_assets import ROOT, write
 from java_models import resource_config
+
+sys.path.insert(0, os.path.join(ROOT, "behavior_pack"))
+from anvilcraft_scripts.common.logistics import (
+    CHUTE, CHUTE_BOXES, DOWN_CHUTES, ORDINARY_CHUTES, SIMPLE_CHUTES,
+)
 
 BLOCKS = (
     ("magnet_block", u"磁铁块"), ("hollow_magnet_block", u"空心磁铁块"),
     ("held_anvil", u"铁砧"), ("held_chipped_anvil", u"开裂的铁砧"),
     ("held_damaged_anvil", u"损坏的铁砧"), ("chute", u"溜槽"), ("magnetic_chute", u"磁力溜槽"),
+    ("chute_down", u"溜槽"), ("simple_chute", u"简易溜槽"), ("simple_chute_down", u"简易溜槽"),
+    ("simple_chute_tall", u"简易溜槽"), ("simple_chute_tall_down", u"简易溜槽"),
 )
 RECIPES = (
     "chute", "magnetic_chute", "magnet_block", "hollow_magnet_block",
@@ -26,11 +34,13 @@ def main(upstream):
         resources = json.load(handle)
     names = [u"item.anvilcraft:magnet_ingot.name=磁铁锭"]
     for name, title in BLOCKS:
-        held, chute = name.startswith("held_"), name.endswith("chute")
         identifier = "anvilcraft:" + name
-        description = {"identifier": identifier, "category": "none" if held else "construction"}
+        held = name.startswith("held_")
+        chute = identifier in ORDINARY_CHUTES or name == "magnetic_chute"
+        hidden = held or identifier in ORDINARY_CHUTES and identifier != CHUTE
+        description = {"identifier": identifier, "category": "none" if hidden else "construction"}
         components = {
-            "minecraft:destroy_time": 5.0 if held else 2.0,
+            "minecraft:destroy_time": 5.0 if held or identifier in ORDINARY_CHUTES else 2.0,
             "minecraft:explosion_resistance": 6.0,
             "minecraft:loot": "loot_tables/blocks/" + name + ".json",
             "netease:listen_block_remove": {"value": True},
@@ -42,10 +52,23 @@ def main(upstream):
         if name in ("magnet_block", "hollow_magnet_block"):
             components["netease:block_entity"]["client_tick"] = True
         if chute:
-            components["netease:face_directional"] = {"type": "facing_direction"}
+            if identifier not in DOWN_CHUTES:
+                components["netease:face_directional"] = {"type": "facing_direction"}
             components["netease:on_entity_inside"] = {"send_python_event": True}
+            components["netease:neighborchanged_sendto_script"] = {"value": True}
             if name == "chute":
                 components["netease:block_entity"]["client_tick"] = True
+        if identifier in CHUTE_BOXES:
+            boxes = [{"min": [value / 16.0 for value in low],
+                      "max": [value / 16.0 for value in high]}
+                     for low, high in CHUTE_BOXES[identifier]]
+            components["netease:aabb"] = {"collision": boxes, "clip": boxes}
+            components["netease:solid"] = {"value": False}
+            components["netease:tier"] = {"digger": "pickaxe", "destroy_special": True, "level": 0}
+        if identifier in SIMPLE_CHUTES:
+            components["netease:water_source"] = {"value": True}
+            components["netease:water_destory"] = {"value": False}
+            components["netease:can_built_over"] = {"value": False}
         if held:
             components["netease:face_directional"] = {"type": "direction"}
             components["netease:aabb"] = {
@@ -57,15 +80,25 @@ def main(upstream):
                      {"min": [0.3125, 0, 0], "max": [0.6875, 1, 0.3125]},
                      {"min": [0.3125, 0, 0.6875], "max": [0.6875, 1, 1]}]
             components["netease:aabb"] = {"collision": boxes, "clip": boxes}
-        particle = ("anvilcraft_block_anvil" if held else "anvilcraft_block_magnet_block_side"
-                    if name in ("magnet_block", "hollow_magnet_block") else
-                    "anvilcraft_block_chute" if name == "chute" else "anvilcraft_block_magnetic_chute_bottom")
-        resources[identifier] = resource_config(name, particle)
+        if held:
+            particle = "anvilcraft_block_anvil"
+        elif name in ("magnet_block", "hollow_magnet_block"):
+            particle = "anvilcraft_block_magnet_block_side"
+        elif identifier in SIMPLE_CHUTES and name != "simple_chute_down":
+            particle = "anvilcraft_block_simple_chute"
+        elif identifier in ORDINARY_CHUTES:
+            particle = "anvilcraft_block_chute"
+        else:
+            particle = "anvilcraft_block_magnetic_chute_bottom"
+        resources[identifier] = resource_config(
+            name, particle, "chute" if identifier in ORDINARY_CHUTES else None)
         write("behavior_pack/netease_blocks/" + name + ".json", {
             "format_version": "1.10.0", "minecraft:block": {
                 "description": description, "components": components}})
         write("behavior_pack/loot_tables/blocks/" + name + ".json", {"pools": [] if held else [
-            {"rolls": 1, "entries": [{"type": "item", "name": identifier, "weight": 1}]}]})
+            {"rolls": 1, "entries": [{"type": "item",
+                                     "name": CHUTE if identifier in ORDINARY_CHUTES else identifier,
+                                     "weight": 1}]}]})
         names.append(u"tile." + identifier + u".name=" + title)
     write("resource_pack/blocks.json", resources)
     write("behavior_pack/netease_items_beh/magnet_ingot.json", {

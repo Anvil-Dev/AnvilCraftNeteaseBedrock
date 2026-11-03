@@ -1,0 +1,497 @@
+{
+    "format_version": "1.21.0",
+    "minecraft:geometry": [
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -14,
+                                0,
+                                2
+                            ],
+                            "size": [
+                                12,
+                                15,
+                                12
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        2.0,
+                                        1.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        15.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        2.0,
+                                        1.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        15.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        2.0,
+                                        1.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        15.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        2.0,
+                                        1.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        15.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -16,
+                                12,
+                                0
+                            ],
+                            "size": [
+                                16,
+                                4,
+                                2
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        14.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        2.0,
+                                        4.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        16.0,
+                                        4.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        16.0,
+                                        4.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        2.0,
+                                        4.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -16,
+                                12,
+                                14
+                            ],
+                            "size": [
+                                16,
+                                4,
+                                2
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        2.0,
+                                        4.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        16.0,
+                                        4.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        16.0,
+                                        4.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        14.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        2.0,
+                                        4.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -16,
+                                12,
+                                2
+                            ],
+                            "size": [
+                                2,
+                                4,
+                                12
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        2.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        4.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        2.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        4.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -2,
+                                12,
+                                2
+                            ],
+                            "size": [
+                                2,
+                                4,
+                                12
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        2.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        4.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        2.0,
+                                        0.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        4.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.chute_down.material_0_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -14,
+                                0,
+                                2
+                            ],
+                            "size": [
+                                12,
+                                15,
+                                12
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        14.0,
+                                        14.0
+                                    ],
+                                    "uv_size": [
+                                        -12.0,
+                                        -12.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.chute_down.material_1_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -14,
+                                0,
+                                2
+                            ],
+                            "size": [
+                                12,
+                                15,
+                                12
+                            ],
+                            "uv": {
+                                "up": {
+                                    "uv": [
+                                        14.0,
+                                        14.0
+                                    ],
+                                    "uv_size": [
+                                        -12.0,
+                                        -12.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -16,
+                                12,
+                                0
+                            ],
+                            "size": [
+                                16,
+                                4,
+                                2
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        16.0,
+                                        16.0
+                                    ],
+                                    "uv_size": [
+                                        -16.0,
+                                        -2.0
+                                    ]
+                                },
+                                "up": {
+                                    "uv": [
+                                        16.0,
+                                        2.0
+                                    ],
+                                    "uv_size": [
+                                        -16.0,
+                                        -2.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -16,
+                                12,
+                                14
+                            ],
+                            "size": [
+                                16,
+                                4,
+                                2
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        16.0,
+                                        2.0
+                                    ],
+                                    "uv_size": [
+                                        -16.0,
+                                        -2.0
+                                    ]
+                                },
+                                "up": {
+                                    "uv": [
+                                        16.0,
+                                        16.0
+                                    ],
+                                    "uv_size": [
+                                        -16.0,
+                                        -2.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -16,
+                                12,
+                                2
+                            ],
+                            "size": [
+                                2,
+                                4,
+                                12
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        16.0,
+                                        14.0
+                                    ],
+                                    "uv_size": [
+                                        -2.0,
+                                        -12.0
+                                    ]
+                                },
+                                "up": {
+                                    "uv": [
+                                        16.0,
+                                        14.0
+                                    ],
+                                    "uv_size": [
+                                        -2.0,
+                                        -12.0
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "origin": [
+                                -2,
+                                12,
+                                2
+                            ],
+                            "size": [
+                                2,
+                                4,
+                                12
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        2.0,
+                                        14.0
+                                    ],
+                                    "uv_size": [
+                                        -2.0,
+                                        -12.0
+                                    ]
+                                },
+                                "up": {
+                                    "uv": [
+                                        2.0,
+                                        14.0
+                                    ],
+                                    "uv_size": [
+                                        -2.0,
+                                        -12.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.chute_down.material_2_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        }
+    ]
+}

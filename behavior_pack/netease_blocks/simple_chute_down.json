@@ -1,0 +1,78 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "category": "none",
+            "identifier": "anvilcraft:simple_chute_down"
+        },
+        "components": {
+            "netease:block_entity": {
+                "tick": true,
+                "movable": false
+            },
+            "netease:aabb": {
+                "collision": [
+                    {
+                        "max": [
+                            0.875,
+                            0.75,
+                            0.875
+                        ],
+                        "min": [
+                            0.125,
+                            0.0,
+                            0.125
+                        ]
+                    }
+                ],
+                "clip": [
+                    {
+                        "max": [
+                            0.875,
+                            0.75,
+                            0.875
+                        ],
+                        "min": [
+                            0.125,
+                            0.0,
+                            0.125
+                        ]
+                    }
+                ]
+            },
+            "netease:tier": {
+                "digger": "pickaxe",
+                "destroy_special": true,
+                "level": 0
+            },
+            "netease:water_destory": {
+                "value": false
+            },
+            "netease:solid": {
+                "value": false
+            },
+            "netease:can_built_over": {
+                "value": false
+            },
+            "netease:on_entity_inside": {
+                "send_python_event": true
+            },
+            "netease:neighborchanged_sendto_script": {
+                "value": true
+            },
+            "minecraft:block_light_absorption": 0,
+            "netease:listen_block_remove": {
+                "value": true
+            },
+            "minecraft:loot": "loot_tables/blocks/simple_chute_down.json",
+            "minecraft:explosion_resistance": 6.0,
+            "minecraft:destroy_time": 5.0,
+            "netease:water_source": {
+                "value": true
+            },
+            "netease:redstone": {
+                "type": "consumer"
+            }
+        }
+    }
+}

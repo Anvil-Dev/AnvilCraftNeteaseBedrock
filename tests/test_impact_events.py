@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """按 3.10 的事件签名回放同一铁砧从实体还原为方块的过程。"""
 
+import copy
 import logging
 import math
 import os
@@ -38,6 +39,17 @@ class Engine(object):
         self.hit = {"identifier": "minecraft:cobblestone", "pos": (-1, 63, 1)}
         self.writes = []
         self.liquids = {}
+        self.extra_data = {}
+
+    def CreateExtraData(self, level):
+        return self
+
+    def GetExtraData(self, key):
+        return copy.deepcopy(self.extra_data.get(key))
+
+    def SetExtraData(self, key, value, sync):
+        self.extra_data[key] = copy.deepcopy(value)
+        return True
 
     def ListenForEvent(self, namespace, system, name, listener, callback):
         self.callbacks[name] = callback

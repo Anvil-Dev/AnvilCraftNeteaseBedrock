@@ -24,6 +24,11 @@ MODELS = (
     ("hollow_magnet_block", "anvilcraft:block/hollow_magnet_block"),
     ("chute", "anvilcraft:block/chute_side"),
     ("magnetic_chute", "anvilcraft:block/magnetic_chute"),
+    ("chute_down", "anvilcraft:block/chute"),
+    ("simple_chute", "anvilcraft:block/simple_chute_side"),
+    ("simple_chute_down", "anvilcraft:block/simple_chute"),
+    ("simple_chute_tall", "anvilcraft:block/simple_chute_side_tall"),
+    ("simple_chute_tall_down", "anvilcraft:block/simple_chute_tall"),
     ("held_anvil", "minecraft:block/anvil"),
     ("held_chipped_anvil", "minecraft:block/chipped_anvil"),
     ("held_damaged_anvil", "minecraft:block/damaged_anvil"),
@@ -119,7 +124,11 @@ def compile_assets(upstream, minecraft):
             "format_version": "1.10.0", "minecraft:client_entity": {"description": description}})
         generated["resource_pack/models/entity/" + name + ".geo.json"] = encode({
             "format_version": "1.21.0", "minecraft:geometry": geometry_rows})
-        blocks["anvilcraft:" + name] = resource_config(name, texture_key(particle))
+        hidden_chute = name == "chute_down" or name.startswith("simple_chute")
+        blocks["anvilcraft:" + name] = resource_config(
+            name, texture_key(particle), "chute" if hidden_chute else None)
+        if hidden_chute:
+            continue
         icon = "textures/anvilcraft/icons/" + name
         icon_name = "minecraft:item/" + name[5:] if name.startswith("held_") else "anvilcraft:item/" + name
         icon_model = models.read(icon_name)

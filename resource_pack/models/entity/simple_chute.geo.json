@@ -1,0 +1,190 @@
+{
+    "format_version": "1.21.0",
+    "minecraft:geometry": [
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -12.025,
+                                3.975,
+                                -4.025
+                            ],
+                            "size": [
+                                8.05,
+                                8.05,
+                                16.0
+                            ],
+                            "uv": {
+                                "north": {
+                                    "uv": [
+                                        4.0,
+                                        4.0
+                                    ],
+                                    "uv_rotation": 180,
+                                    "uv_size": [
+                                        8.0,
+                                        8.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.simple_chute.material_0_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -12.025,
+                                3.975,
+                                -4.025
+                            ],
+                            "size": [
+                                8.05,
+                                8.05,
+                                16.0
+                            ],
+                            "uv": {
+                                "south": {
+                                    "uv": [
+                                        4.0,
+                                        16.0
+                                    ],
+                                    "uv_rotation": 180,
+                                    "uv_size": [
+                                        8.0,
+                                        -8.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.simple_chute.material_1_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -12.025,
+                                3.975,
+                                -4.025
+                            ],
+                            "size": [
+                                8.05,
+                                8.05,
+                                16.0
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        4.0,
+                                        16.0
+                                    ],
+                                    "uv_size": [
+                                        8.0,
+                                        -16.0
+                                    ]
+                                },
+                                "east": {
+                                    "uv": [
+                                        4.0,
+                                        0.0
+                                    ],
+                                    "uv_rotation": 270,
+                                    "uv_size": [
+                                        8.0,
+                                        16.0
+                                    ]
+                                },
+                                "up": {
+                                    "uv": [
+                                        4.0,
+                                        16.0
+                                    ],
+                                    "uv_rotation": 180,
+                                    "uv_size": [
+                                        8.0,
+                                        -16.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        12.0,
+                                        0.0
+                                    ],
+                                    "uv_rotation": 90,
+                                    "uv_size": [
+                                        -8.0,
+                                        16.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.simple_chute.material_2_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        }
+    ]
+}

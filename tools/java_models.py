@@ -8,12 +8,13 @@ import os
 import zipfile
 
 
-def resource_config(name, particle):
+def resource_config(name, particle, icon_name=None):
     """让网易方块实体与手持形态使用同一份转换模型。"""
     return {"sound": "anvil" if name.startswith("held_") else "metal", "textures": particle,
             "client_entity": {"identifier": "anvilcraft:" + name,
                               "hand_model_use_client_entity": True,
-                              "block_icon": "anvilcraft_icon_" + name, "destroyed_textures": particle}}
+                              "block_icon": "anvilcraft_icon_" + (icon_name or name),
+                              "destroyed_textures": particle}}
 
 
 def split_id(value):

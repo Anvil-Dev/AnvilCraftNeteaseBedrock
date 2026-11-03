@@ -8,7 +8,9 @@ import unittest
 from test_stations import Machines
 from test_drop_work import GroundItem, LOG
 from anvilcraft_scripts.common.drop_recipes import CRUSH, STAMP
-from anvilcraft_scripts.common.logistics import CHUTE, DIRECTIONS, MAGNETIC_CHUTE, offset
+from anvilcraft_scripts.common.logistics import (
+    CHUTE, CHUTE_DOWN, DIRECTIONS, LOGISTICS, MAGNETIC_CHUTE, offset,
+)
 from anvilcraft_scripts.common.magnets import HELD, MAGNETS, REQUEST_EVENT, STATE_EVENT
 from anvilcraft_scripts.server.impact_events import ImpactEvents
 
@@ -24,7 +26,16 @@ class Motion(object):
         return True
 
 
+class EntityData(dict):
+
+    def __missing__(self, key):
+        return None
+
+
 class Factory(Machines):
+
+    class ItemPosType(Machines.ItemPosType):
+        INVENTORY = 0
 
     def __init__(self):
         super(Factory, self).__init__()
@@ -44,6 +55,25 @@ class Factory(Machines):
         self.game_type = 0
         self.may_place = True
         self.block_listeners = set()
+        self.block_data = {}
+        self.player_inventory = {}
+
+    def CreateBlockEntityData(self, level):
+        return self
+
+    def GetBlockEntityData(self, dim, pos):
+        return self.block_data.setdefault((dim, pos), EntityData())
+
+    def GetPlayerItem(self, kind, slot, user_data):
+        if kind == self.ItemPosType.INVENTORY:
+            return copy.deepcopy(self.player_inventory.get(slot))
+        return super(Factory, self).GetPlayerItem(kind, slot, user_data)
+
+    def SpawnItemToPlayerInv(self, item, player, slot=-1):
+        if self.refuse_hand:
+            return False
+        self.player_inventory[slot] = copy.deepcopy(item)
+        return True
 
     def BroadcastToAllClient(self, name, data):
         self.messages.append((None, name, copy.deepcopy(data)))
@@ -101,14 +131,20 @@ class Factory(Machines):
         result = super(Factory, self).SetBlockNew(pos, block, mode, dimension, legacy, updateNeighbors)
         if result:
             self.aux[dimension, pos] = block.get("aux", 0)
+            self.cell_states.pop((dimension, pos), None)
+            self.block_data.pop((dimension, pos), None)
+            self.liquids.pop((dimension, pos), None)
         return result
 
     def GetBlockStates(self, pos, dim):
-        default = {"facing_direction": self.aux.get((dim, pos), 0)} if self.cells.get((dim, pos)) in (CHUTE, MAGNETIC_CHUTE) else {}
+        default = ({"facing_direction": self.aux.get((dim, pos), 0)}
+                   if self.cells.get((dim, pos)) in LOGISTICS else {})
         return copy.deepcopy(self.cell_states.get((dim, pos), default))
 
     def SetBlockStates(self, pos, states, dim):
         self.cell_states[dim, pos] = copy.deepcopy(states)
+        if "facing_direction" in states:
+            self.aux[dim, pos] = states["facing_direction"]
         return True
 
     def GetContainerSize(self, pos, dim):
@@ -147,7 +183,7 @@ class MechanismTests(unittest.TestCase):
 
     def record(self, pos, *items):
         record = dict(items=list(items))
-        if self.world.cells[0, pos] in (CHUTE, MAGNETIC_CHUTE):
+        if self.world.cells[0, pos] in LOGISTICS:
             record["logistics"] = True
         self.stations.inventory.write(0, pos, record)
 
@@ -301,7 +337,8 @@ class MechanismTests(unittest.TestCase):
         self.cell(self.pos, CHUTE)
         self.tick(self.pos)
         self.world.drops["input"] = GroundItem("minecraft:diamond", 7, (0.5, 63.625, 0.5), 0)
-        event = dict(blockName=CHUTE, blockX=0, blockY=63, blockZ=0, entityId="input")
+        event = dict(blockName=self.world.cells[0, self.pos], blockX=0, blockY=63, blockZ=0,
+                     entityId="input")
         self.world.callbacks["OnEntityInsideBlockServerEvent"](event)
         self.world.callbacks["OnEntityInsideBlockServerEvent"](event)
         self.assertEqual(7, self.contents(self.pos)[0]["count"])
@@ -603,7 +640,7 @@ class MechanismTests(unittest.TestCase):
         self.assertEqual(5, self.dropped("paper")[0].item["count"])
 
     def test_native_push_saved_receipt_completes_once_after_reload(self):
-        self.cell(self.pos, CHUTE)
+        self.cell(self.pos, CHUTE_DOWN)
         below = (0, 62, 0)
         self.box(below)
         self.record(self.pos, self.item("diamond", 7))

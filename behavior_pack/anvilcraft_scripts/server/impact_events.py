@@ -85,6 +85,9 @@ class ImpactEvents(object):
             ("BlockStrengthChangedServerEvent", self._magnets.signal),
             ("ServerEntityTryPlaceBlockEvent", self._logistics.place),
             ("OnEntityInsideBlockServerEvent", self._logistics.inside),
+            ("BlockNeighborChangedServerEvent", self._logistics.changed),
+            ("ServerPlaceBlockEntityEvent", self._logistics.changed),
+            ("InventoryItemChangedServerEvent", self._logistics.inventory_changed),
         ):
             system.ListenForEvent(self._api.GetEngineNamespace(), self._api.GetEngineSystemName(),
                                   event, self, callback)

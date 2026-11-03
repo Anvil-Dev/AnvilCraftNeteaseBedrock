@@ -13,6 +13,9 @@
             "netease:on_entity_inside": {
                 "send_python_event": true
             },
+            "netease:neighborchanged_sendto_script": {
+                "value": true
+            },
             "minecraft:block_light_absorption": 0,
             "netease:listen_block_remove": {
                 "value": true

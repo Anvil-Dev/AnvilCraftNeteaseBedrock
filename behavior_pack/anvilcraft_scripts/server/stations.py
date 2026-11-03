@@ -57,7 +57,8 @@ class Stations(object):
             return
         self._restore_liquid(dim, pos)
         record = self.inventory.get(dim, pos)
-        remaining = dict(record, items=[]) if record.get("liquid") else None
+        remaining = (dict(record, items=[])
+                     if record.get("liquid") or record.get("form_token") else None)
         if self.inventory.write(dim, pos, remaining):
             self.send(dim, (pos[0] + 0.5, pos[1] + 0.5, pos[2] + 0.5), record["items"])
 
@@ -103,7 +104,7 @@ class Stations(object):
         """先确认完整掉落物快照，接收失败时退回已取走的物品。"""
         for drop in self._drops.snapshot(name, dim, pos):
             record = self.inventory.get(dim, pos)
-            if record.get("transfer"):
+            if record.get("transfer") or record.get("form_token"):
                 return
             items, take = insert(record["items"], drop.item, 8, self.maximum(drop.item), True)
             if not take or self._name(dim, pos) != name:
@@ -143,7 +144,7 @@ class Stations(object):
         try:
             self.absorb(dim, pos, name)
             record = self.inventory.get(dim, pos)
-            if record.get("transfer"):
+            if record.get("transfer") or record.get("form_token"):
                 return
             drops = [Drop(i, pos, item) for i, item in enumerate(record["items"])]
             batch = match_drops(name, drops)
@@ -178,7 +179,7 @@ class Stations(object):
         liquid = blocks.GetLiquidBlock(pos, dim)
         if liquid and liquid.get("name") != "minecraft:air":
             record = self.inventory.get(dim, pos)
-            if record.get("transfer"):
+            if record.get("transfer") or record.get("form_token"):
                 return
             record["liquid"] = liquid
             if not self.inventory.write(dim, pos, record):
@@ -217,7 +218,7 @@ class Stations(object):
         self.busy.add(key)
         try:
             record = self.inventory.get(dim, pos)
-            if record.get("transfer"):
+            if record.get("transfer") or record.get("form_token"):
                 return
             item = self.carried(player)
             if face != 1:

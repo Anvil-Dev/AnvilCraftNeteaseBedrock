@@ -1,0 +1,23 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "geometry": {
+                "material_0_0": "geometry.anvilcraft.simple_chute_tall_down.material_0_0",
+                "material_1_0": "geometry.anvilcraft.simple_chute_tall_down.material_1_0"
+            },
+            "identifier": "anvilcraft:simple_chute_tall_down",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "render_controllers": [
+                "controller.render.anvilcraft.simple_chute_tall_down.material_0",
+                "controller.render.anvilcraft.simple_chute_tall_down.material_1"
+            ],
+            "textures": {
+                "material_0": "textures/anvilcraft/block/chute_bottom",
+                "material_1": "textures/anvilcraft/block/simple_chute"
+            }
+        }
+    }
+}

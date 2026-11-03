@@ -9,6 +9,16 @@
         "sound": "metal",
         "textures": "anvilcraft_block_chute"
     },
+    "anvilcraft:chute_down": {
+        "client_entity": {
+            "block_icon": "anvilcraft_icon_chute",
+            "destroyed_textures": "anvilcraft_block_chute",
+            "hand_model_use_client_entity": true,
+            "identifier": "anvilcraft:chute_down"
+        },
+        "sound": "metal",
+        "textures": "anvilcraft_block_chute"
+    },
     "anvilcraft:crushing_table": {
         "client_entity": {
             "block_icon": "anvilcraft_icon_crushing_table",
@@ -88,6 +98,46 @@
         },
         "sound": "metal",
         "textures": "anvilcraft_block_processing_table_top"
+    },
+    "anvilcraft:simple_chute": {
+        "client_entity": {
+            "block_icon": "anvilcraft_icon_chute",
+            "destroyed_textures": "anvilcraft_block_simple_chute",
+            "hand_model_use_client_entity": true,
+            "identifier": "anvilcraft:simple_chute"
+        },
+        "sound": "metal",
+        "textures": "anvilcraft_block_simple_chute"
+    },
+    "anvilcraft:simple_chute_down": {
+        "client_entity": {
+            "block_icon": "anvilcraft_icon_chute",
+            "destroyed_textures": "anvilcraft_block_chute",
+            "hand_model_use_client_entity": true,
+            "identifier": "anvilcraft:simple_chute_down"
+        },
+        "sound": "metal",
+        "textures": "anvilcraft_block_chute"
+    },
+    "anvilcraft:simple_chute_tall": {
+        "client_entity": {
+            "block_icon": "anvilcraft_icon_chute",
+            "destroyed_textures": "anvilcraft_block_simple_chute",
+            "hand_model_use_client_entity": true,
+            "identifier": "anvilcraft:simple_chute_tall"
+        },
+        "sound": "metal",
+        "textures": "anvilcraft_block_simple_chute"
+    },
+    "anvilcraft:simple_chute_tall_down": {
+        "client_entity": {
+            "block_icon": "anvilcraft_icon_chute",
+            "destroyed_textures": "anvilcraft_block_simple_chute",
+            "hand_model_use_client_entity": true,
+            "identifier": "anvilcraft:simple_chute_tall_down"
+        },
+        "sound": "metal",
+        "textures": "anvilcraft_block_simple_chute"
     },
     "anvilcraft:stamping_platform": {
         "client_entity": {

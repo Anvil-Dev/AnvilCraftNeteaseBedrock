@@ -55,7 +55,7 @@ def in_recipe_area(platform, pos, feet):
         center_y, half_width, half_height = y + 1, 0.5, 0.5
     else:
         center_y, half_width, half_height = y + 1, 0.5, 0.125
-    half_item = 0.0625
+    half_item = 0.125 if platform == COLLECTION_AREA else 0.0625
     return (abs(feet[0] - x - 0.5) < half_width + half_item and
             abs(feet[1] + 0.125 - center_y) < half_height + half_item and
             abs(feet[2] - z - 0.5) < half_width + half_item)

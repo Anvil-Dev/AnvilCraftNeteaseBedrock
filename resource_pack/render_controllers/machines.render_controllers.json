@@ -115,6 +115,39 @@
                 "Texture.material_5"
             ]
         },
+        "controller.render.anvilcraft.chute_down.material_0": {
+            "geometry": "Geometry.material_0_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_0"
+            ]
+        },
+        "controller.render.anvilcraft.chute_down.material_1": {
+            "geometry": "Geometry.material_1_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_1"
+            ]
+        },
+        "controller.render.anvilcraft.chute_down.material_2": {
+            "geometry": "Geometry.material_2_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_2"
+            ]
+        },
         "controller.render.anvilcraft.crushing_table.material_0": {
             "geometry": "Geometry.material_0_0",
             "materials": [
@@ -550,6 +583,138 @@
             ],
             "textures": [
                 "Texture.material_3"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute.material_0": {
+            "geometry": "Geometry.material_0_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_0"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute.material_1": {
+            "geometry": "Geometry.material_1_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_1"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute.material_2": {
+            "geometry": "Geometry.material_2_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_2"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_down.material_0": {
+            "geometry": "Geometry.material_0_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_0"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_down.material_1": {
+            "geometry": "Geometry.material_1_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_1"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_down.material_2": {
+            "geometry": "Geometry.material_2_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_2"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_tall.material_0": {
+            "geometry": "Geometry.material_0_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_0"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_tall.material_1": {
+            "geometry": "Geometry.material_1_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_1"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_tall.material_2": {
+            "geometry": "Geometry.material_2_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_2"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_tall.material_3": {
+            "geometry": "Geometry.material_3_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_3"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_tall_down.material_0": {
+            "geometry": "Geometry.material_0_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_0"
+            ]
+        },
+        "controller.render.anvilcraft.simple_chute_tall_down.material_1": {
+            "geometry": "Geometry.material_1_0",
+            "materials": [
+                {
+                    "*": "Material.default"
+                }
+            ],
+            "textures": [
+                "Texture.material_1"
             ]
         },
         "controller.render.anvilcraft.stamping_platform.material_0": {

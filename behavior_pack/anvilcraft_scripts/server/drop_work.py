@@ -117,6 +117,11 @@ class DropWork(object):
     def close(self):
         self._delivery.flush()
 
+    def flush(self):
+        """确认暂存的掉落物已写入世界数据，供跨模块发放完成后确认凭据。"""
+        self.load()
+        return self._delivery.flush()
+
     def deliver(self, dim, deliveries):
         self.load()
         self._delivery.send(dim, deliveries)

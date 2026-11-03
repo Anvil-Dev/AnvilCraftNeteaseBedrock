@@ -1,0 +1,185 @@
+{
+    "format_version": "1.21.0",
+    "minecraft:geometry": [
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -14,
+                                0,
+                                2
+                            ],
+                            "size": [
+                                12,
+                                12,
+                                12
+                            ],
+                            "uv": {
+                                "east": {
+                                    "uv": [
+                                        2.0,
+                                        4.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        12.0
+                                    ]
+                                },
+                                "north": {
+                                    "uv": [
+                                        2.0,
+                                        4.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        12.0
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        2.0,
+                                        4.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        12.0
+                                    ]
+                                },
+                                "west": {
+                                    "uv": [
+                                        2.0,
+                                        4.0
+                                    ],
+                                    "uv_size": [
+                                        12.0,
+                                        12.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.simple_chute_down.material_0_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -14,
+                                0,
+                                2
+                            ],
+                            "size": [
+                                12,
+                                12,
+                                12
+                            ],
+                            "uv": {
+                                "down": {
+                                    "uv": [
+                                        14.0,
+                                        14.0
+                                    ],
+                                    "uv_size": [
+                                        -12.0,
+                                        -12.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.simple_chute_down.material_1_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        },
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -14,
+                                0,
+                                2
+                            ],
+                            "size": [
+                                12,
+                                12,
+                                12
+                            ],
+                            "uv": {
+                                "up": {
+                                    "uv": [
+                                        14.0,
+                                        14.0
+                                    ],
+                                    "uv_size": [
+                                        -12.0,
+                                        -12.0
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "name": "root",
+                    "pivot": [
+                        -8,
+                        8,
+                        8
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.anvilcraft.simple_chute_down.material_2_0",
+                "texture_height": 16,
+                "texture_width": 16,
+                "visible_bounds_height": 4,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ],
+                "visible_bounds_width": 4
+            }
+        }
+    ]
+}
