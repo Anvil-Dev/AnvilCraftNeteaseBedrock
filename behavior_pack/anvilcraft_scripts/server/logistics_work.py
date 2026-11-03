@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from anvilcraft_scripts.common.drop_recipes import TABLES, item_name
 from anvilcraft_scripts.common.logistics import (
-    CHUTE, COLLECTION_AREA, CONTAINERS, DIRECTIONS, LOGISTICS, MAGNETIC_CHUTE, offset,
+    CHUTE, COLLECTION_AREA, CONTAINERS, DIRECTIONS, LOGISTICS, MAGNETIC_CHUTE, offset, placement_facing,
 )
 from anvilcraft_scripts.server.inventory import insert, stack_equal
 
@@ -15,6 +15,7 @@ class LogisticsWork(object):
     """机器库存间一次保存，原版容器交换保存扣料前后快照以便恢复。"""
 
     def __init__(self, api, log, stations, drop_work):
+        self._api = api
         self._factory, self._level = api.GetEngineCompFactory(), api.GetLevelId()
         self._log, self._stations, self._drops = log, stations, drop_work
         self._inventory = stations.inventory
@@ -24,6 +25,12 @@ class LogisticsWork(object):
         self._reported = set()
         self._decisions = {}
 
+    def load(self):
+        whitelist = self._factory.CreateBlockUseEventWhiteList(self._level)
+        for name in sorted(CONTAINERS):
+            if not whitelist.AddBlockItemListenForUseEvent(name):
+                self._log.warning("[AnvilCraft] could not register chute placement on %s", name)
+
     def _name(self, dim, pos):
         if not self._factory.CreateChunkSource(self._level).CheckChunkState(dim, pos):
             return None
@@ -32,6 +39,84 @@ class LogisticsWork(object):
 
     def _record(self, dim, pos):
         return self._inventory.get(dim, pos)
+
+    def _facing(self, dim, pos):
+        states = self._factory.CreateBlockState(self._level).GetBlockStates(pos, dim) or {}
+        return states.get("facing_direction", 0)
+
+    def place(self, args):
+        name = args["fullName"]
+        if name not in LOGISTICS or args.get("cancel"):
+            return
+        face = args["face"]
+        if face not in range(6):
+            return
+        dim, pos = args["dimensionId"], (args["x"], args["y"], args["z"])
+        player = args["entityId"]
+        sneaking = self._factory.CreatePlayer(player).isSneaking()
+        look = self._api.GetDirFromRot(self._factory.CreateRot(player).GetRot()) if name == MAGNETIC_CHUTE else None
+        neighbours = []
+        for direction in DIRECTIONS:
+            cell = offset(pos, direction)
+            other = self._name(dim, cell)
+            neighbours.append((other, self._facing(dim, cell) if other in LOGISTICS else None))
+        facing = placement_facing(name, face, sneaking, look, neighbours)
+        if facing is None:
+            args["cancel"] = True
+        else:
+            args["auxData"] = facing
+
+    def attach(self, args):
+        """手持溜槽点击容器时先放置，防止容器界面截走方块物品操作。"""
+        if args.get("cancel") or (args["blockName"] not in CONTAINERS and args["blockName"] not in TABLES):
+            return False
+        player, dim, face = args["playerId"], args["dimensionId"], args.get("face")
+        item = self._stations.carried(player)
+        if not item or not item.get("count", 0) or item_name(item) not in LOGISTICS:
+            return False
+        args["cancel"] = True
+        clicked = args["x"], args["y"], args["z"]
+        if face not in range(6) or not self._stations.reachable(player, dim, clicked):
+            return True
+        target = offset(clicked, DIRECTIONS[face])
+        key = dim, target
+        if key in self._busy or self._used.get(player, -1) > self._stations.tick:
+            return True
+        game_type = self._factory.CreateGame(self._level).GetPlayerGameType(player)
+        if game_type not in (0, 1):
+            return True
+        original = self._name(dim, target)
+        if original not in ("minecraft:air", "minecraft:water", "minecraft:flowing_water",
+                            "minecraft:lava", "minecraft:flowing_lava"):
+            return True
+        name = item_name(item)
+        placement = dict(fullName=name, auxData=0, face=face, entityId=player, dimensionId=dim,
+                         x=target[0], y=target[1], z=target[2])
+        self.place(placement)
+        if placement.get("cancel"):
+            return True
+        aux = item.get("newAuxValue", item.get("auxValue", 0))
+        if not self._factory.CreateItem(player).MayPlaceOn(name, aux, clicked, face):
+            return True
+        self._used[player] = self._stations.tick + 8
+        self._busy.add(key)
+        try:
+            if self._name(dim, target) != original or self._stations.carried(player) != item:
+                return True
+            if game_type == 0 and not self._stations.replace_carried(player, item, 1):
+                return True
+            placed = False
+            if self._name(dim, target) == original:
+                placed = self._factory.CreateBlockInfo(self._level).SetBlockNew(
+                    target, {"name": name, "aux": placement["auxData"]}, 0, dim)
+                placed = placed or self._name(dim, target) == name
+            if not placed and game_type == 0:
+                refund = deepcopy(item)
+                refund["count"] = 1
+                self._stations.send(dim, self._factory.CreatePos(player).GetFootPos(), [refund])
+        finally:
+            self._busy.remove(key)
+        return True
 
     def _native(self, dim, pos):
         name = self._name(dim, pos)
@@ -103,7 +188,8 @@ class LogisticsWork(object):
             current = self._native(dim, native_pos)
             if current == snapshot:
                 applied = False
-        return self._recover(dim, pos, applied) and applied is True
+        self._recover(dim, pos, applied)
+        return applied is True
 
     def _move(self, dim, source, target, limit=64):
         source_name, target_name = self._name(dim, source), self._name(dim, target)
@@ -166,13 +252,15 @@ class LogisticsWork(object):
             return
         name = self._name(dim, source)
         if name in LOGISTICS:
+            facing = self._facing(dim, source)
+            if facing not in range(6) or offset(source, DIRECTIONS[facing]) != pos:
+                return
             # 当前节点已持有位置锁，暂时让出给同一次服务端交换。
             self._busy.remove((dim, pos))
             try:
-                self._move(dim, source, pos)
+                return self._move(dim, source, pos)
             finally:
                 self._busy.add((dim, pos))
-            return
         if name in TABLES:
             return
         native = self._native(dim, source)
@@ -190,15 +278,20 @@ class LogisticsWork(object):
                 reserved["count"] = take
                 self._busy.add((dim, source))
                 try:
-                    self._native_exchange(dim, pos, source, native, slot, rest if rest["count"] else None,
-                                          record, {"op": "pull", "result": contents, "reserved": [reserved]})
+                    return self._native_exchange(dim, pos, source, native, slot, rest if rest["count"] else None,
+                                                 record, {"op": "pull", "result": contents, "reserved": [reserved]})
                 finally:
                     self._busy.remove((dim, source))
-                return
+            return
         if name is None:
             return
+        return self._collect(dim, pos, source)
+
+    def _collect(self, dim, pos, source):
         for drop in self._drops.snapshot(COLLECTION_AREA, dim, source):
             record = self._record(dim, pos)
+            if record.get("transfer"):
+                return
             contents, take = self._accept(record, self._name(dim, pos), drop.item)
             if not take:
                 continue
@@ -207,11 +300,12 @@ class LogisticsWork(object):
             record["items"], record["logistics"] = contents, True
             remaining = deepcopy(drop.item)
             remaining["count"] -= take
-            if not self._inventory.write(dim, pos, record):
+            saved = self._inventory.write(dim, pos, record)
+            if not saved:
                 remaining = drop.item
             if remaining["count"]:
                 self._stations.send(dim, drop.pos, [remaining])
-            return
+            return saved
 
     def _eject(self, dim, pos, target, direction, magnetic):
         if self._name(dim, target) != "minecraft:air":
@@ -232,6 +326,34 @@ class LogisticsWork(object):
             point = tuple(value + 0.5 for value in target)
             motion = tuple(value * (0.25 if magnetic else 0) for value in direction)
             self._drops.deliver(dim, [(point, payload, motion)])
+            return True
+
+    def inside(self, args):
+        name = args["blockName"]
+        if name not in LOGISTICS:
+            return
+        entity = args["entityId"]
+        kind = self._factory.CreateEngineType(entity)
+        if kind is None or kind.GetEngineTypeStr() != "minecraft:item":
+            return
+        dimension = self._factory.CreateDimension(entity)
+        if dimension is None:
+            return
+        dim = dimension.GetEntityDimensionId()
+        pos = args["blockX"], args["blockY"], args["blockZ"]
+        key = dim, pos
+        if key in self._busy or self._cooldown.get(key, 0) > 0 or self._name(dim, pos) != name:
+            return
+        redstone = self._factory.CreateRedStone(self._level)
+        if redstone.GetBlockPoweredState(pos, dim) or redstone.GetStrength(pos, dim) > 0:
+            return
+        self._busy.add(key)
+        try:
+            if self._recover(dim, pos) and self._collect(dim, pos, pos):
+                self._cooldown[key] = 8
+        finally:
+            self._busy.remove(key)
+            self._orphan(dim, pos)
 
     def block_tick(self, args):
         name = args["blockName"]
@@ -244,7 +366,6 @@ class LogisticsWork(object):
         self._cooldown[key] = max(0, self._cooldown.get(key, 0) - 1)
         if self._cooldown[key]:
             return
-        self._cooldown[key] = 8
         self._busy.add(key)
         try:
             if not self._recover(dim, pos):
@@ -252,17 +373,27 @@ class LogisticsWork(object):
             redstone = self._factory.CreateRedStone(self._level)
             if redstone.GetBlockPoweredState(pos, dim) or redstone.GetStrength(pos, dim) > 0:
                 return
-            states = self._factory.CreateBlockState(self._level).GetBlockStates(pos, dim) or {}
-            facing = states.get("facing_direction", 0)
-            if facing not in range(6) or (name == CHUTE and facing == 1):
+            facing = self._facing(dim, pos)
+            if name == CHUTE and facing == 1:
+                if not self._factory.CreateBlockState(self._level).SetBlockStates(pos, {"facing_direction": 0}, dim):
+                    self._log.warning("[AnvilCraft] could not correct chute direction dim=%s pos=%s", dim, pos)
+                    return
+                facing = 0
+            if facing not in range(6):
                 return
             direction = DIRECTIONS[facing]
             target = offset(pos, direction)
-            if not self._move(dim, pos, target):
-                self._eject(dim, pos, target, direction, name == MAGNETIC_CHUTE)
+            worked = self._move(dim, pos, target)
+            if not worked:
+                worked = self._eject(dim, pos, target, direction, name == MAGNETIC_CHUTE)
             if not self._record(dim, pos).get("transfer") and self._name(dim, pos) == name:
                 source = offset(pos, (0, 1, 0) if name == CHUTE else tuple(-n for n in direction))
-                self._pull(dim, pos, source)
+                worked = self._pull(dim, pos, source) or worked
+                # 掉落物可以落入槽体内部，Java 的碰撞收集独立于入口格吸取。
+                if not self._record(dim, pos).get("transfer") and self._name(dim, pos) == name:
+                    worked = self._collect(dim, pos, pos) or worked
+            if worked:
+                self._cooldown[key] = 8
         finally:
             self._busy.remove(key)
             self._orphan(dim, pos)
@@ -314,6 +445,9 @@ class LogisticsWork(object):
     def use(self, args):
         name = args["blockName"]
         if name not in LOGISTICS:
+            return
+        item = self._stations.carried(args["playerId"])
+        if item and item.get("count", 0) > 0 and item_name(item) in LOGISTICS:
             return
         args["cancel"] = True
         player, dim, face = args["playerId"], args["dimensionId"], args.get("face")

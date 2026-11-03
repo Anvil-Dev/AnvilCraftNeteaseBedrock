@@ -51,6 +51,12 @@ class Workshop(Engine):
     def CreateBlock(self, level):
         return self
 
+    def CreateBlockUseEventWhiteList(self, level):
+        return self
+
+    def AddBlockItemListenForUseEvent(self, name):
+        return True
+
     def LookupBlocksByBlockTag(self, tag):
         return []
 

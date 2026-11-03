@@ -83,12 +83,16 @@ class ImpactEvents(object):
             ("ServerBlockEntityTickEvent", self._machine_tick),
             ("BlockRemoveServerEvent", self._machine_remove),
             ("BlockStrengthChangedServerEvent", self._magnets.signal),
+            ("ServerEntityTryPlaceBlockEvent", self._logistics.place),
+            ("OnEntityInsideBlockServerEvent", self._logistics.inside),
         ):
             system.ListenForEvent(self._api.GetEngineNamespace(), self._api.GetEngineSystemName(),
                                   event, self, callback)
         system.ListenForEvent("AnvilCraft", "Visuals", REQUEST_EVENT, self._magnets, self._magnets.request_visual)
 
     def _machine_use(self, args):
+        if self._logistics.attach(args):
+            return
         self._stations.use(args)
         self._logistics.use(args)
 
@@ -109,6 +113,7 @@ class ImpactEvents(object):
     def _load_tags(self, args):
         self._drop_work.load()
         self._block_work.load()
+        self._logistics.load()
         blocks = self._factory.CreateBlock(self._level)
         for block in blocks.LookupBlocksByBlockTag("anvilcraft:impact_anvils") or ():
             self._anvils.add(block["blockName"])

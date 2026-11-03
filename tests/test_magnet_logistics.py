@@ -8,7 +8,7 @@ import unittest
 from test_stations import Machines
 from test_drop_work import GroundItem, LOG
 from anvilcraft_scripts.common.drop_recipes import CRUSH, STAMP
-from anvilcraft_scripts.common.logistics import CHUTE, MAGNETIC_CHUTE
+from anvilcraft_scripts.common.logistics import CHUTE, DIRECTIONS, MAGNETIC_CHUTE, offset
 from anvilcraft_scripts.common.magnets import HELD, MAGNETS, REQUEST_EVENT, STATE_EVENT
 from anvilcraft_scripts.server.impact_events import ImpactEvents
 
@@ -40,6 +40,10 @@ class Factory(Machines):
         self.sneaking = False
         self.refuse_motion = False
         self.messages = []
+        self.look = (0, 0, 1)
+        self.game_type = 0
+        self.may_place = True
+        self.block_listeners = set()
 
     def BroadcastToAllClient(self, name, data):
         self.messages.append((None, name, copy.deepcopy(data)))
@@ -52,6 +56,25 @@ class Factory(Machines):
 
     def CreatePlayer(self, player):
         return self
+
+    def CreateRot(self, entity):
+        return self
+
+    def GetRot(self):
+        return 0, 0
+
+    def GetDirFromRot(self, rotation):
+        return self.look
+
+    def GetPlayerGameType(self, player):
+        return self.game_type
+
+    def MayPlaceOn(self, name, aux, pos, facing):
+        return self.may_place
+
+    def AddBlockItemListenForUseEvent(self, name):
+        self.block_listeners.add(name)
+        return True
 
     def isSneaking(self):
         return self.sneaking
@@ -81,7 +104,8 @@ class Factory(Machines):
         return result
 
     def GetBlockStates(self, pos, dim):
-        return copy.deepcopy(self.cell_states.get((dim, pos), {}))
+        default = {"facing_direction": self.aux.get((dim, pos), 0)} if self.cells.get((dim, pos)) in (CHUTE, MAGNETIC_CHUTE) else {}
+        return copy.deepcopy(self.cell_states.get((dim, pos), default))
 
     def SetBlockStates(self, pos, states, dim):
         self.cell_states[dim, pos] = copy.deepcopy(states)
@@ -146,6 +170,203 @@ class MechanismTests(unittest.TestCase):
 
     def dropped(self, name):
         return [row for row in self.world.drops.values() if row.item["newItemName"] == "minecraft:" + name]
+
+    def placing(self, name, face):
+        event = dict(fullName=name, auxData=1, face=face, entityId="player", dimensionId=0,
+                     x=self.pos[0], y=self.pos[1], z=self.pos[2], cancel=False)
+        self.world.callbacks["ServerEntityTryPlaceBlockEvent"](event)
+        return event
+
+    def test_chute_placement_matches_clicked_face_and_sneaking_including_downward(self):
+        for sneaking in (False, True):
+            self.world.sneaking = sneaking
+            for face in range(6):
+                event = self.placing(CHUTE, face)
+                expected = face if sneaking else face ^ 1
+                self.assertEqual(0 if expected < 2 else expected, event["auxData"])
+                self.assertFalse(event["cancel"])
+
+    def test_magnetic_placement_supports_six_look_directions_and_extends_existing_output(self):
+        vectors = ((0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1), (-1, 0, 0), (1, 0, 0))
+        for sneaking in (False, True):
+            self.world.sneaking = sneaking
+            for direction, vector in enumerate(vectors):
+                self.world.look = vector
+                self.assertEqual(direction ^ int(sneaking), self.placing(MAGNETIC_CHUTE, 1)["auxData"])
+        self.cell((-1, 63, 0), MAGNETIC_CHUTE)
+        self.world.cell_states[0, (-1, 63, 0)] = {"facing_direction": 5}
+        self.world.look, self.world.sneaking = (0, 0, -1), False
+        self.assertEqual(5, self.placing(MAGNETIC_CHUTE, 5)["auxData"])
+
+    def test_incoming_chute_reverses_new_output_and_opposing_sandwich_cancels_placement(self):
+        self.cell((-1, 63, 0), CHUTE)
+        self.world.cell_states[0, (-1, 63, 0)] = {"facing_direction": 5}
+        self.assertEqual(5, self.placing(CHUTE, 5)["auxData"])
+        self.cell((1, 63, 0), MAGNETIC_CHUTE)
+        self.world.cell_states[0, (1, 63, 0)] = {"facing_direction": 4}
+        self.assertTrue(self.placing(CHUTE, 5)["cancel"])
+        self.world.look = (-1, 0, 0)
+        self.assertTrue(self.placing(MAGNETIC_CHUTE, 5)["cancel"])
+
+    def test_items_inside_both_chute_bodies_are_collected_and_old_upward_chute_is_corrected(self):
+        for name in (CHUTE, MAGNETIC_CHUTE):
+            self.cell(self.pos, name)
+            self.world.cell_states[0, self.pos] = {"facing_direction": 1}
+            self.world.drops.clear()
+            self.stations.inventory.write(0, self.pos, None)
+            drop = GroundItem("minecraft:diamond", 7, (0.5, 63.625, 0.5), 0, extraId="ground")
+            entity = "input_" + name
+            self.world.drops[entity] = drop
+            self.tick(self.pos, 8)
+            self.assertNotIn(entity, self.world.drops)
+            self.assertEqual("ground", self.contents(self.pos)[0]["extraId"])
+            if name == CHUTE:
+                self.assertEqual(0, self.world.GetBlockStates(self.pos, 0)["facing_direction"])
+
+    def test_chute_item_use_allows_chain_placement_without_consuming_it_as_inventory(self):
+        self.cell(self.pos, CHUTE)
+        self.world.carried = dict(newItemName=CHUTE, newAuxValue=0, count=4)
+        for sneaking in (False, True):
+            self.world.sneaking = sneaking
+            self.stations.tick += 10
+            event = dict(blockName=CHUTE, playerId="player", dimensionId=0, x=0, y=63, z=0, face=5)
+            self.world.callbacks["ServerBlockUseEvent"](event)
+            self.assertFalse(event.get("cancel", False))
+            self.assertEqual([], self.contents(self.pos))
+            self.assertEqual(4, self.world.carried["count"])
+
+    def test_chute_does_not_pull_from_a_neighbour_whose_output_points_away(self):
+        self.cell(self.pos, CHUTE)
+        above = (0, 64, 0)
+        self.cell(above, CHUTE)
+        self.world.cell_states[0, above] = {"facing_direction": 5}
+        self.record(above, self.item("diamond", 7))
+        self.tick(self.pos)
+        self.assertEqual([], self.contents(self.pos))
+        self.assertEqual(7, self.contents(above)[0]["count"])
+
+    def test_normal_top_placement_collects_ground_item_and_outputs_downward(self):
+        event = self.placing(CHUTE, 1)
+        self.cell(self.pos, CHUTE)
+        self.world.SetBlockStates(self.pos, {"facing_direction": event["auxData"]}, 0)
+        below = (0, 62, 0)
+        self.box(below)
+        self.world.drops["input"] = GroundItem("minecraft:diamond", 7, (0.5, 64, 0.5), 0)
+        self.tick(self.pos)
+        self.assertNotIn("input", self.world.drops)
+        self.tick(self.pos, 8)
+        self.assertEqual([], self.contents(self.pos))
+        self.assertEqual(7, self.world.containers[0, below][0]["count"])
+
+    def test_magnetic_six_faces_collect_opposite_ground_items_and_deliver_to_container(self):
+        for facing, direction in enumerate(DIRECTIONS):
+            self.world.cells.clear()
+            self.world.containers.clear()
+            self.world.drops.clear()
+            self.world.look = direction
+            event = self.placing(MAGNETIC_CHUTE, 1)
+            self.cell(self.pos, MAGNETIC_CHUTE)
+            self.world.SetBlockStates(self.pos, {"facing_direction": event["auxData"]}, 0)
+            self.box(offset(self.pos, direction))
+            source = offset(self.pos, DIRECTIONS[facing ^ 1])
+            entity = "input_%d" % facing
+            self.world.drops[entity] = GroundItem("minecraft:iron_sword", 1,
+                tuple(value + 0.5 for value in source), 0, extraId=entity, userData={"Damage": 91})
+            self.tick(self.pos, 8)
+            self.assertNotIn(entity, self.world.drops)
+            self.tick(self.pos, 8)
+            received = self.world.containers[0, offset(self.pos, direction)][0]
+            self.assertEqual((entity, {"Damage": 91}), (received["extraId"], received["userData"]))
+            self.assertEqual([], self.contents(self.pos))
+
+    def test_body_collection_preserves_full_remainder_and_refunds_on_failed_save(self):
+        self.cell(self.pos, CHUTE)
+        self.world.power.add((0, self.pos))
+        self.world.drops["input"] = GroundItem("minecraft:diamond", 7, (0.5, 63.625, 0.5), 0)
+        self.tick(self.pos)
+        self.assertIn("input", self.world.drops)
+        self.world.power.clear()
+        self.world.allow_save = False
+        self.tick(self.pos, 8)
+        self.assertEqual([], self.contents(self.pos))
+        self.assertEqual(7, sum(row.item["count"] for row in self.dropped("diamond")))
+        self.world.allow_save = True
+        self.record(self.pos, *([self.item("diamond", 64)] * 8 + [self.item("diamond", 63)]))
+        self.box((0, 62, 0), [self.item("stone", 64)])
+        self.tick(self.pos, 8)
+        self.assertEqual(64 * 9, sum(row["count"] for row in self.contents(self.pos)))
+        self.assertEqual(6, sum(row.item["count"] for row in self.dropped("diamond")))
+
+    def test_body_collision_collects_between_idle_ticks_and_does_not_reset_cooldown_twice(self):
+        self.cell(self.pos, CHUTE)
+        self.tick(self.pos)
+        self.world.drops["input"] = GroundItem("minecraft:diamond", 7, (0.5, 63.625, 0.5), 0)
+        event = dict(blockName=CHUTE, blockX=0, blockY=63, blockZ=0, entityId="input")
+        self.world.callbacks["OnEntityInsideBlockServerEvent"](event)
+        self.world.callbacks["OnEntityInsideBlockServerEvent"](event)
+        self.assertEqual(7, self.contents(self.pos)[0]["count"])
+        self.assertNotIn("input", self.world.drops)
+        self.assertEqual([], self.dropped("diamond"))
+
+    def test_container_use_places_chute_toward_chest_and_preserves_container_inventory(self):
+        self.world.callbacks["LoadServerAddonScriptsAfter"]({})
+        self.assertIn("minecraft:chest", self.world.block_listeners)
+        self.assertIn("minecraft:purple_shulker_box", self.world.block_listeners)
+        self.box(self.pos, [self.item("diamond", 51)])
+        self.world.carried = dict(newItemName=CHUTE, newAuxValue=0, count=3)
+        event = dict(blockName="minecraft:chest", playerId="player", dimensionId=0, x=0, y=63, z=0, face=5)
+        self.world.callbacks["ServerBlockUseEvent"](event)
+        self.assertTrue(event["cancel"])
+        self.assertEqual(CHUTE, self.world.cells[0, (1, 63, 0)])
+        self.assertEqual(4, self.world.aux[0, (1, 63, 0)])
+        self.assertEqual(2, self.world.carried["count"])
+        self.assertEqual(51, self.world.containers[0, self.pos][0]["count"])
+        self.world.callbacks["ServerBlockUseEvent"](dict(event, cancel=False))
+        self.assertEqual(2, self.world.carried["count"])
+
+    def test_container_attachment_respects_collision_game_mode_and_failed_write_refunds(self):
+        self.box(self.pos)
+        event = dict(blockName="minecraft:chest", playerId="player", dimensionId=0, x=0, y=63, z=0, face=5)
+        item = dict(newItemName=CHUTE, newAuxValue=0, count=3, extraId="refund")
+        self.world.carried = copy.deepcopy(item)
+        self.world.may_place = False
+        self.world.callbacks["ServerBlockUseEvent"](event)
+        self.assertNotIn((0, (1, 63, 0)), self.world.cells)
+        self.assertEqual(item, self.world.carried)
+        self.stations.tick += 10
+        self.world.may_place = True
+        self.world.refuse_cells.add((0, (1, 63, 0)))
+        self.world.callbacks["ServerBlockUseEvent"](dict(event, cancel=False))
+        refund = [row.item for row in self.world.drops.values() if row.item["newItemName"] == CHUTE]
+        self.assertEqual([dict(item, count=1)], refund)
+        self.assertEqual(2, self.world.carried["count"])
+        self.stations.tick += 10
+        self.world.refuse_cells.clear()
+        self.world.game_type = 1
+        self.world.callbacks["ServerBlockUseEvent"](dict(event, cancel=False))
+        self.assertEqual(2, self.world.carried["count"])
+        self.assertEqual(CHUTE, self.world.cells[0, (1, 63, 0)])
+
+    def test_container_attachment_preserves_external_changes_during_hand_update(self):
+        self.box(self.pos)
+        target = (1, 63, 0)
+        original = self.world.SpawnItemToPlayerCarried
+        for replacement in ("minecraft:stone", CHUTE):
+            self.cell(target, "minecraft:air")
+            self.world.drops.clear()
+            self.world.carried = dict(newItemName=CHUTE, newAuxValue=0, count=3, extraId="refund")
+            def change_target(item, player):
+                result = original(item, player)
+                self.cell(target, replacement)
+                return result
+            self.world.SpawnItemToPlayerCarried = change_target
+            self.stations.tick += 10
+            self.world.callbacks["ServerBlockUseEvent"](dict(
+                blockName="minecraft:chest", playerId="player", dimensionId=0, x=0, y=63, z=0, face=5))
+            self.assertEqual(replacement, self.world.cells[0, target])
+            refund = [row.item for row in self.world.drops.values() if row.item["newItemName"] == CHUTE]
+            self.assertEqual([dict(newItemName=CHUTE, newAuxValue=0, count=1, extraId="refund")], refund)
+            self.assertEqual(2, self.world.carried["count"])
 
     def test_both_magnets_sync_power_and_late_join_without_client_control_of_state(self):
         for name in MAGNETS:

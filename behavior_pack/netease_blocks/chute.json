@@ -11,6 +11,9 @@
                 "client_tick": true,
                 "movable": false
             },
+            "netease:on_entity_inside": {
+                "send_python_event": true
+            },
             "minecraft:block_light_absorption": 0,
             "netease:listen_block_remove": {
                 "value": true

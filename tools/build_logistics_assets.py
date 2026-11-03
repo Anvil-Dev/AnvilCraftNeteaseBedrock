@@ -43,6 +43,7 @@ def main(upstream):
             components["netease:block_entity"]["client_tick"] = True
         if chute:
             components["netease:face_directional"] = {"type": "facing_direction"}
+            components["netease:on_entity_inside"] = {"send_python_event": True}
             if name == "chute":
                 components["netease:block_entity"]["client_tick"] = True
         if held:
